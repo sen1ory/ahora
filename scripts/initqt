@@ -1,15 +1,18 @@
 #!/bin/bash
 
+# globals ------------------------------------------------------------ {{{
 PROJECT_NAME=$1
+# }}}
 
-# create dir tree
+# create dir tree ------------------------------------------------------------ {{{
 mkdir -p app/main/{src,include,qml,resources/media}
 mkdir -p core/main/{src,include}
 mkdir -p data/main/{src,include}
 mkdir -p utils/main/{src,include}
 mkdir -p tests/main/{src,include}
+# }}}
 
-# create main.cpp if doesn't exist
+# create main.cpp if doesn't exist ------------------------------------------------------------ {{{
 if [[ ! -f app/main/src/main.cpp ]]; then
     cat > app/main/src/main.cpp <<EOF
 #include <QGuiApplication>
@@ -26,6 +29,8 @@ int main(int argc, char *argv[]) {
 }
 EOF
 fi
+# }}}
+# create Main.qml if it doesn't exist ------------------------------------------------------------ {{{
 if [[ ! -f app/main/qml/Main.qml ]]; then
     cat > app/main/qml/Main.qml <<EOF
 import QtQuick
@@ -39,6 +44,8 @@ Window {
 }
 EOF
 fi
+# }}}
+# create .clangd if it doesn't exist ------------------------------------------------------------ {{{
 if [[ ! -f .clangd ]]; then
     QT_INCLUDE_PREFIX="/usr/include/qt6"
     if [ "$QT_TYPE" = "qml" ]; then
@@ -58,7 +65,10 @@ $(for comp in $QT_COMPONENTS; do echo "    -I$QT_INCLUDE_PREFIX/$comp"; done)
   ]
 EOF
 fi
+# }}}
+# create .build_args if it doesn't exist ------------------------------------------------------------ {{{
 if [[ ! -d .build_args ]]; then
     mkdir .build_args
     echo "$PROJECT_NAME" > .build_args/cmake_projectname
 fi
+# }}}
