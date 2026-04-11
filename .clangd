@@ -1,0 +1,20 @@
+CompileFlags:
+  Add: [
+    -I/usr/include/qt6/QtCore
+    -I/usr/include/qt6/QtGui
+    -I/usr/include/qt6/QtWidgets
+    -I/usr/include/qt6/QtNetwork
+    -I/usr/include/qt6/QtSql
+    -I/usr/include/qt6/QtXml
+    -I/usr/include/qt6/QtMultimedia
+    -I/usr/include/qt6/QtOpenGL
+    -I/usr/include/qt6/QtConcurrent
+    -I/usr/include/qt6/QtDBus
+    -I/usr/include/qt6/QtPrintSupport
+    -I/usr/include/qt6/QtTest
+    -I/usr/include/qt6/QtWebSockets
+    -I/usr/include/qt6
+  ]
+  Remove: [
+    -mno-direct-extern-access
+  ]
