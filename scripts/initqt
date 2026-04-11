@@ -1,0 +1,64 @@
+#!/bin/bash
+
+PROJECT_NAME=$1
+
+# create dir tree
+mkdir -p app/main/{src,include,qml,resources/media}
+mkdir -p core/main/{src,include}
+mkdir -p data/main/{src,include}
+mkdir -p utils/main/{src,include}
+mkdir -p tests/main/{src,include}
+
+# create main.cpp if doesn't exist
+if [[ ! -f app/main/src/main.cpp ]]; then
+    cat > app/main/src/main.cpp <<EOF
+#include <QGuiApplication>
+#include <QQmlApplicationEngine>
+
+int main(int argc, char *argv[]) {
+    QGuiApplication app(argc, argv);
+    QQmlApplicationEngine engine;
+    engine.loadFromModule("${PROJECT_NAME^}_app_main", "Main");
+    if (engine.rootObjects().isEmpty())
+        exit(-1);
+
+    return app.exec();
+}
+EOF
+fi
+if [[ ! -f app/main/qml/Main.qml ]]; then
+    cat > app/main/qml/Main.qml <<EOF
+import QtQuick
+
+Window {
+    id: root
+    width: 640
+    height: 480
+    visible: true
+    title: qsTr("Hello World")
+}
+EOF
+fi
+if [[ ! -f .clangd ]]; then
+    QT_INCLUDE_PREFIX="/usr/include/qt6"
+    if [ "$QT_TYPE" = "qml" ]; then
+        QT_COMPONENTS="QtCore QtQml QtQuick QtNetwork QtWidgets"
+    else
+        QT_COMPONENTS="QtCore QtGui QtWidgets QtNetwork QtSql QtXml QtMultimedia QtOpenGL QtConcurrent QtDBus QtPrintSupport QtTest QtWebSockets"
+    fi
+
+    cat > .clangd <<EOF
+CompileFlags:
+  Add: [
+$(for comp in $QT_COMPONENTS; do echo "    -I$QT_INCLUDE_PREFIX/$comp"; done)
+    -I$QT_INCLUDE_PREFIX
+  ]
+  Remove: [
+    -mno-direct-extern-access
+  ]
+EOF
+fi
+if [[ ! -d .build_args ]]; then
+    mkdir .build_args
+    echo "$PROJECT_NAME" > .build_args/cmake_projectname
+fi

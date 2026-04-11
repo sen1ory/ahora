@@ -1,0 +1,183 @@
+#!/usr/bin/env bash
+
+# get args ------------------------------------------------------------ 
+# usage
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 <cmake_rewrite>"
+    exit 1
+fi
+
+# input vars handling
+CMAKE_REWRITE="$2"
+QT_VERSION=6
+QT_TYPE="qml"
+
+
+while [[ ! -d .build_args && $PWD != / ]]; do
+    cd ..
+done
+if [[ $PWD == "/" ]]; then
+    echo "Run initqt first, no root found."
+    exit 1
+fi
+
+PROJECT_NAME="$(cat .build_args/cmake_projectname)"
+
+# write args
+echo "$QT_VERSION" > .build_args/cmake_qtversion
+echo "$QT_TYPE" > .build_args/cmake_qttype
+
+# set qt components and libraries
+if [ "$QT_TYPE" == "qml" ]; then
+    COMPONENTS="Quick Network"
+    LIBS="Qt${QT_VERSION}::Quick Qt${QT_VERSION}::Network"
+else
+    COMPONENTS="Widgets"
+    LIBS="Qt${QT_VERSION}::Widgets"
+fi
+
+
+# get worthy (non-empty) dirs for cmake generation (out of: app core data utils tests)
+CMAKE_DIRS="$(for DIR in app core data utils tests; do find ./${DIR} -mindepth 3 -type f -regex ".*/src/.*\$" | sed -E "s/^\.\/([^/]+\/[^/]+).*/\1/"; done)"
+EXEC_DIR=""
+
+# generate top/main cmake ------------------------------------------------------------ {{{
+# TODO: add support for qt5 gen
+if [[ ! -f CMakeLists.txt || $CMAKE_REWRITE == "y" ]]; then
+    cat > CMakeLists.txt <<EOF
+# requirements ------------------------------------------------------------ {{{
+cmake_minimum_required(VERSION 3.16)
+
+project(${PROJECT_NAME} VERSION 1.0.0 LANGUAGES CXX)
+
+set(CMAKE_AUTORCC ON)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+find_package(Qt${QT_VERSION} REQUIRED COMPONENTS ${COMPONENTS})
+$(if [ "$QT_VERSION" == "6" ]; then echo "qt_standard_project_setup(REQUIRES 6.5)"; fi)
+# }}}
+# subdirectories ------------------------------------------------------------ {{{
+$(for LOCAL_CMAKE_DIR in $CMAKE_DIRS; do echo "add_subdirectory($LOCAL_CMAKE_DIR)"; done)
+# }}}
+EOF
+fi
+# }}}
+
+# ONLY ONE MAIN.CPP CAN EXIST
+for CMAKE_DIR in $CMAKE_DIRS; do
+    pushd "$CMAKE_DIR"
+
+    POSTFIX=$(echo "$CMAKE_DIR" | tr "/" "_")
+
+    SOURCE_FILES=$(find ./src -type f -name "*.cpp" ! -name "main.cpp" | sed "s/\.\///")
+    HEADER_FILES=$(find ./include -type f -name "*.h" | sed "s/\.\///")
+    QML_FILES=$(find ./qml -type f -name "*.qml" | sed "s/\.\///")
+    RESOURCE_FILES=$(find ./resources -mindepth 2 -type f | sed "s/\.\///")
+    MAIN_FILES=$(find ./src -type f -name "main.cpp" | sed "s/\.\///")
+
+    # TODO: handle widgets
+    if [[ ! -f CMakeLists.txt || $CMAKE_REWRITE == "y" ]]; then
+        DIR_TYPE=$(echo "$CMAKE_DIR" | sed -E "s/.*\/([^/]+?\/[^/]+?)\/.*/\1/")
+        case $DIR_TYPE in
+            app*)
+                cat > CMakeLists.txt <<EOF
+qt_add_qml_module(${PROJECT_NAME}_${POSTFIX}
+    URI ${PROJECT_NAME^}_${POSTFIX}
+    VERSION "1.0"
+EOF
+                if [[ $QML_FILES == *[![:space:]]* ]]; then
+                    cat >> CMakeLists.txt <<EOF
+    QML_FILES
+$(for QML_FILE in $QML_FILES; do echo "        $QML_FILE"; done)
+
+EOF
+                fi
+                if [[ $SOURCE_FILES == *[![:space:]]* ]]; then
+                    cat >> CMakeLists.txt <<EOF
+    SOURCES
+$(for SOURCE_FILE in $(echo $SOURCE_FILES | sed "s/main.cpp//"); do echo "        $SOURCE_FILE"; done)
+
+EOF
+                fi
+                if [[ $RESOURCE_FILES == *[![:space:]]* ]]; then
+                    cat >> CMakeLists.txt <<EOF
+    RESOURCES
+$(for RESOURCE_FILE in $RESOURCE_FILES; do echo "        $RESOURCE_FILE"; done)
+EOF
+                fi
+                cat >> CMakeLists.txt <<EOF
+)
+
+EOF
+                if [[ $MAIN_FILES == *[![:space:]]* ]]; then
+                    EXEC_DIR=$CMAKE_DIR
+                    cat >> CMakeLists.txt <<EOF
+add_executable(${PROJECT_NAME}
+    src/main.cpp
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+$(for LIB in $LIBS; do echo "    $LIB"; done)
+$(for LOCAL_LIB in $CMAKE_DIRS; do LOCAL_POSTFIX=$(echo "$LOCAL_LIB" | tr "/" "_"); echo "${PROJECT_NAME}_${LOCAL_POSTFIX}"; done)
+)
+EOF
+                fi
+                ;;
+            *)
+                cat > CMakeLists.txt <<EOF
+add_library(${PROJECT_NAME}_${POSTFIX} STATIC
+    $(for SOURCE_FILE in $(echo $SOURCE_FILES | sed "s/main.cpp//"); do echo "        $SOURCE_FILE"; done)
+)
+target_include_directories(${PROJECT_NAME}_${POSTFIX} PUBLIC
+    $CMAKE_DIR/include
+)
+EOF
+                if [[ $SOURCE_FILES == *main.cpp* ]]; then
+                    EXEC_DIR=$CMAKE_DIR
+                    cat > CMakeLists.txt <<EOF
+add_executable(${PROJECT_NAME}
+    src/main.cpp
+)
+target_link_libraries(${PROJECT_NAME} PRIVATE 
+$(for LIB in $LIBS; do echo "    $LIB"; done)
+$(for LOCAL_LIB in $CMAKE_DIRS; do LOCAL_POSTFIX=$(echo "$LOCAL_LIB" | tr "/" "_"); echo "    ${PROJECT_NAME}_${LOCAL_POSTFIX}"; done)
+)
+EOF
+                fi
+                ;;
+        esac
+    fi
+
+    popd
+done
+
+
+# build cmake ------------------------------------------------------------ {{{
+# prebuild
+cmake -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+if [ $? -ne 0 ]; then
+    echo "CMake configuration failed"
+    exit 1
+fi
+
+if [ -f build/compile_commands.json ]; then
+    ln -sf build/compile_commands.json .
+    echo "Linked compile_commands.json"
+else
+    echo "compile_commands.json not found in build/"
+fi
+
+# build
+echo "Building..."
+cmake --build build -j 12
+if [ $? -eq 0 ]; then
+    echo "Build successful"
+    ln -sf "build/${EXEC_DIR}/${PROJECT_NAME}" "$PROJECT_NAME"
+    echo "build/${EXEC_DIR}/${PROJECT_NAME}" > .build_args/cmake_execname
+    echo "Linked executable '$PROJECT_NAME' -> build/$PROJECT_NAME"
+else
+    echo "Build failed"
+    exit 1
+fi
+# }}}
