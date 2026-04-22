@@ -8,7 +8,7 @@ fi
 # }}}
 
 # globals ------------------------------------------------------------ {{{
-CMAKE_REWRITE="$2"
+CMAKE_REWRITE="$1"
 QT_VERSION=6
 QT_TYPE="qml"
 
@@ -34,13 +34,16 @@ fi
 # read and write args ------------------------------------------------------------ {{{
 PROJECT_NAME="$(cat .build_args/cmake_projectname)"
 
+if [[ -f .build_args/cmake_execname && $CMAKE_REWRITE == "n" ]]; then
+    EXEC_DIR="$(cat .build_args/cmake_execname)"
+fi
+
 echo "$QT_VERSION" > .build_args/cmake_qtversion
 echo "$QT_TYPE" > .build_args/cmake_qttype
 # }}}
 
 # get worthy (non-empty) dirs for cmake generation (out of: app core data utils tests)
-CMAKE_DIRS="$(for DIR in app core data utils tests; do find ./${DIR} -mindepth 3 -type f -regex ".*/src/.*\$" | sed -E "s/^\.\/([^/]+\/[^/]+).*/\1/"; done)"
-EXEC_DIR=""
+CMAKE_DIRS="$(for DIR in app core data utils tests; do find ./${DIR} -mindepth 3 -type f -regex ".*/src/[^/]*\$" | sed -E "s/^\.\/([^/]+\/[^/]+).*/\1/"; done | sort -u)"
 
 # generate top/main cmake ------------------------------------------------------------ {{{
 # TODO: add support for qt5 gen
@@ -72,11 +75,11 @@ for CMAKE_DIR in $CMAKE_DIRS; do
 
     POSTFIX=$(echo "$CMAKE_DIR" | tr "/" "_")
 
-    SOURCE_FILES=$(find ./src -type f -name "*.cpp" ! -name "main.cpp" | sed "s/\.\///")
-    HEADER_FILES=$(find ./include -type f -name "*.h" | sed "s/\.\///")
-    QML_FILES=$(find ./qml -type f -name "*.qml" | sed "s/\.\///")
-    RESOURCE_FILES=$(find ./resources -mindepth 2 -type f | sed "s/\.\///")
-    MAIN_FILES=$(find ./src -type f -name "main.cpp" | sed "s/\.\///")
+    SOURCE_FILES=$(find ./src -type f -name "*.cpp" ! -name "main.cpp" | sed -E "s/\.\///")
+    HEADER_FILES=$(find ./include -type f -name "*.h" | sed -E "s/\.\///")
+    QML_FILES=$(find ./qml -type f -name "*.qml" | sed -E "s/\.\///")
+    RESOURCE_FILES=$(find ./resources -mindepth 2 -type f | sed -E "s/\.\///")
+    MAIN_FILES=$(find ./src -type f -name "main.cpp" | sed -E "s/\.\///")
 
     # TODO: handle widgets
     if [[ ! -f CMakeLists.txt || $CMAKE_REWRITE == "y" ]]; then
@@ -89,12 +92,12 @@ qt_add_qml_module(${PROJECT_NAME}_${POSTFIX}
     URI ${PROJECT_NAME^}_${POSTFIX}
     VERSION "1.0"
 EOF
+                # }}}
                 # qml files {{{
                 if [[ $QML_FILES == *[![:space:]]* ]]; then
                     cat >> CMakeLists.txt <<EOF
     QML_FILES
 $(for QML_FILE in $QML_FILES; do echo "        $QML_FILE"; done)
-
 EOF
                 fi
                 # }}}
@@ -103,8 +106,7 @@ EOF
                     # main.cpp excluded (handled below)
                     cat >> CMakeLists.txt <<EOF
     SOURCES
-$(for SOURCE_FILE in $(echo $SOURCE_FILES | sed "s/main.cpp//"); do echo "        $SOURCE_FILE"; done)
-
+$(for SOURCE_FILE in $(echo $SOURCE_FILES | sed -E "s/main\.cpp//"); do echo "        $SOURCE_FILE"; done)
 EOF
                 fi
                 # }}}
@@ -115,7 +117,6 @@ EOF
 $(for RESOURCE_FILE in $RESOURCE_FILES; do echo "        $RESOURCE_FILE"; done)
 EOF
                 fi
-                # }}}
                 cat >> CMakeLists.txt <<EOF
 )
 
@@ -123,7 +124,7 @@ EOF
                 # }}}
                 # main.cpp files addition {{{
                 if [[ $MAIN_FILES == *[![:space:]]* ]]; then
-                    EXEC_DIR=$CMAKE_DIR
+                    EXEC_DIR="$CMAKE_DIR"
                     cat >> CMakeLists.txt <<EOF
 add_executable(${PROJECT_NAME}
     src/main.cpp
@@ -149,7 +150,7 @@ EOF
                 # }}}
                 # main.cpp specific sub cmake {{{
                 if [[ $MAIN_FILES == *[![:space:]]* ]]; then
-                    EXEC_DIR=$CMAKE_DIR
+                    EXEC_DIR="$CMAKE_DIR"
                     cat > CMakeLists.txt <<EOF
 add_executable(${PROJECT_NAME}
     src/main.cpp
@@ -184,12 +185,15 @@ else
     echo "compile_commands.json not found in build/"
 fi
 # }}}
-
 # build ------------------------------------------------------------ {{{
 echo "Building..."
 cmake --build build -j 12
 if [ $? -eq 0 ]; then
     echo "Build successful"
+    # don't write cmake_execname when it exists and when rewrite is false
+    if [[ ! -f .build_args/cmake_execname || $CMAKE_REWRITE == "y" ]]; then
+        echo "build/${EXEC_DIR}/${PROJECT_NAME}" > .build_args/cmake_execname
+    fi
     ln -sf "build/${EXEC_DIR}/${PROJECT_NAME}" "$PROJECT_NAME"
     echo "build/${EXEC_DIR}/${PROJECT_NAME}" > .build_args/cmake_execname
     echo "Linked executable '$PROJECT_NAME' -> build/$PROJECT_NAME"
