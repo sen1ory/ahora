@@ -11,6 +11,5 @@ add_executable(ahora
 target_link_libraries(ahora PRIVATE 
     Qt6::Quick
     Qt6::Network
-ahora_app_main
-ahora_app_qrcode
+    ahora_app_main
 )
