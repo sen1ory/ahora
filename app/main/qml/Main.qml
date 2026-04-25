@@ -56,5 +56,10 @@ Window {
         anchors.topMargin: 20
         visible: qrCodeVisible
         color: "#ffffff"
+
+        Image {
+            anchors.fill: parent
+            source: "image://qrgen/Hello World"
+        }
     }
 }
