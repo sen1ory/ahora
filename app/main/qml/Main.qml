@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import Ahora_app_qrcode
 
 Window {
     id: root
@@ -47,7 +48,7 @@ Window {
         }
     }
 
-    Rectangle {
+    QRCodeItem {
         id: qrCodePlaceholder
         width: Math.min(root.width, root.height) / 2
         height: width
@@ -55,11 +56,8 @@ Window {
         anchors.top: hideButton.bottom
         anchors.topMargin: 20
         visible: qrCodeVisible
-        color: "#ffffff"
-
-        Image {
-            anchors.fill: parent
-            source: "image://qrgen/Hello World"
-        }
+        text: "http://www.qt.io"
+        foreground: "#ebdbb2"
+        background: "#1d2021"
     }
 }
