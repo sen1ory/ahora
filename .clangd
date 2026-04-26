@@ -13,6 +13,8 @@ CompileFlags:
     -I/usr/include/qt6/QtPrintSupport
     -I/usr/include/qt6/QtTest
     -I/usr/include/qt6/QtWebSockets
+    -I/usr/include/qt6/QtQml
+    -I/usr/include/qt6/QtQuick
     -I/usr/include/qt6
   ]
   Remove: [
