@@ -1,6 +1,6 @@
 #include "../include/QRCodeItem.h"
 #include <QPainter>
-
+~
 using namespace qrcodegen;
 
 QRCodeItem::QRCodeItem(QQuickItem *parent)
