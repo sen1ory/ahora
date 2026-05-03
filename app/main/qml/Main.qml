@@ -56,7 +56,7 @@ Window {
         anchors.top: hideButton.bottom
         anchors.topMargin: 20
         visible: qrCodeVisible
-        text: "http://www.qt.io"
+        autoIp: true
         foreground: "#ebdbb2"
         background: "#1d2021"
     }

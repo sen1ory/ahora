@@ -8,6 +8,7 @@
 #include <QSize>
 #include <QtQml/QQmlEngine>
 #include "qrcodegen.hpp"
+#include "ipadress.h"
 
 
 class QRCodeItem : public QQuickPaintedItem {
@@ -17,6 +18,7 @@ class QRCodeItem : public QQuickPaintedItem {
     Q_PROPERTY(QColor foreground READ foreground WRITE setForeground NOTIFY foregroundChanged)
     Q_PROPERTY(QColor background READ background WRITE setBackground NOTIFY backgroundChanged)
     Q_PROPERTY(int border READ border WRITE setBorder NOTIFY borderChanged)
+    Q_PROPERTY(bool autoIp READ autoIp WRITE setAutoIp NOTIFY autoIpChanged)
 
 public:
     QRCodeItem(QQuickItem *parent = nullptr);
@@ -33,6 +35,9 @@ public:
 
     int border() const { return m_border; }
     void setBorder(int border);
+
+    bool autoIp() const { return m_autoIp; }
+    void setAutoIp(bool autoIp);
     // }}}
 
 private:
@@ -44,6 +49,7 @@ signals:
     void foregroundChanged();
     void backgroundChanged();
     void borderChanged();
+    void autoIpChanged();
     // }}}
 
 private:
@@ -55,9 +61,11 @@ private:
     QColor m_background{Qt::white};
     // TODO: fix border painting
     int m_border{4};
+    bool m_autoIp{false};
     // }}}
 
     QImage m_qrImage;
+    IpAdress *m_ipAdress;
 };
 
 

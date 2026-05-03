@@ -6,9 +6,8 @@ qt_add_qml_module(ahora_core_ipadress
         src/ipadress.cpp
 )
 
-target_link_libraries(ahora_core_ipadress PRIVATE Qt6::Network)
+target_link_libraries(ahora_core_ipadress PRIVATE Qt6::Gui Qt6::Quick Qt6::Network)
 
 target_include_directories(ahora_core_ipadress PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-
