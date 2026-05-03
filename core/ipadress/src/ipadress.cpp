@@ -24,3 +24,5 @@ QString IpAdress::discoverIp() {
     }
     return QStringLiteral("127.0.0.1");
 }
+
+//  test
