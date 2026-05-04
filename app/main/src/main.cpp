@@ -1,6 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 #include <QQmlContext>
+#include <QtQml>
 
 // Наши модули
 #include "HttpServer.h"
@@ -24,10 +25,10 @@ int main(int argc, char *argv[]) {
     // WsServer — WebSocket для общения с браузерами на порту 8081
     WsServer wsServer(&sessionManager, 8081);
 
-    // === Экспортируем SessionManager в QML ===
-    // В QML к нему можно обращаться как sessionManager.teamCount, sessionManager.teamName(row) и т.д.
-    qInfo().noquote() << "[Main] Экспортируем SessionManager в QML как sessionManager";
-    engine.rootContext()->setContextProperty("sessionManager", &sessionManager);
+    // === Экспортируем SessionManager в QML как синглтон SM ===
+    // Используется как SM.teamCount, SM.teamName(row) и т.д.
+    qInfo().noquote() << "[Main] Регистрируем SessionManager в QML как SM";
+    qmlRegisterSingletonInstance("Ahora_app_main", 1, 0, "SM", &sessionManager);
 
     // === Загружаем QML ===
     engine.loadFromModule("Ahora_app_main", "Main");

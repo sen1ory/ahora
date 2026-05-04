@@ -214,7 +214,6 @@ Window {
         id: adminPanel
         anchors.fill: parent
         visible: currentView === "ADMIN_PANEL"
-        sessionManager: sessionManager  // Передаём из контекста
 
         // При нажатии "Назад" возвращаемся к QR-коду
         onGoBack: {
