@@ -1,8 +1,8 @@
-#include "../include/ipadress.h"
+#include "../include/ipaddress.h"
 #include <QNetworkInterface>
 
 
-IpAdress::IpAdress(QObject *parent)
+IpAddress::IpAddress(QObject *parent)
     : QObject(parent)
 {
     discoverIps();
@@ -11,14 +11,14 @@ IpAdress::IpAdress(QObject *parent)
 // Обновить список адресов. Автоматически выбирает лучший:
 // 1) Предпочитает адреса не на WiFi-интерфейсах (хотспот, usb, ethernet)
 // 2) Если таких нет — берёт первый не-loopback IPv4
-void IpAdress::refresh() {
+void IpAddress::refresh() {
     discoverIps();
     emit ipsChanged();
     emit ipChanged();
 }
 
 // Принудительно выбрать IP из списка
-void IpAdress::selectIp(const QString &ip) {
+void IpAddress::selectIp(const QString &ip) {
     if (m_allIps.contains(ip) && m_ip != ip) {
         m_ip = ip;
         emit ipChanged();
@@ -26,7 +26,7 @@ void IpAdress::selectIp(const QString &ip) {
 }
 
 // Заполняем m_allIps и выбираем лучший m_ip
-void IpAdress::discoverIps() {
+void IpAddress::discoverIps() {
     QStringList newIps;
     QString bestIp;
 

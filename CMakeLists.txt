@@ -14,7 +14,7 @@ qt_standard_project_setup(REQUIRES 6.5)
 # subdirectories ------------------------------------------------------------ {{{
 add_subdirectory(app/main)
 add_subdirectory(app/qrcode)
-add_subdirectory(core/ipadress)
+add_subdirectory(core/ipaddress)
 add_subdirectory(core/session)
 add_subdirectory(core/wsserver)
 add_subdirectory(core/httpserver)

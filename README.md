@@ -23,8 +23,8 @@ ahora/
 │   ├── httpserver/              # Minimal HTTP server on port 8080
 │   │   ├── HttpServer.h/.cpp    # Serves web client HTML page
 │   │   └── web_content.h        # Inlined HTML/JS/CSS for the web client
-│   ├── ipadress/                # Network IP discovery
-│   │   └── ipadress.h/.cpp      # Enumerates interfaces, selects best IP
+│   ├── ipaddress/                # Network IP discovery
+│   │   └── ipaddress.h/.cpp      # Enumerates interfaces, selects best IP
 │   ├── session/                 # Team session management
 │   │   ├── SessionManager.h/.cpp # QAbstractListModel: teams, answers, scores, broadcast
 │   │   └── QuizDef.h            # Hard-coded quiz questions (single, multiple, text)

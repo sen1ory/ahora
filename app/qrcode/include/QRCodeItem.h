@@ -8,7 +8,7 @@
 #include <QSize>
 #include <QtQml/QQmlEngine>
 #include "qrcodegen.hpp"
-#include "ipadress.h"
+#include "ipaddress.h"
 
 
 class QRCodeItem : public QQuickPaintedItem {
@@ -65,7 +65,7 @@ private:
     // }}}
 
     QImage m_qrImage;
-    IpAdress *m_ipAdress;
+    IpAddress *m_ipAddress;
 };
 
 

@@ -8,7 +8,7 @@
 #include <QtQml/QQmlEngine>
 
 
-class IpAdress : public QObject {
+class IpAddress : public QObject {
     Q_OBJECT
     QML_ELEMENT
     // Текущий выбранный IP для QR-кода
@@ -17,7 +17,7 @@ class IpAdress : public QObject {
     Q_PROPERTY(QStringList allIps READ allIps NOTIFY ipsChanged)
 
 public:
-    IpAdress(QObject *parent = nullptr);
+    IpAddress(QObject *parent = nullptr);
 
     // геттеры {{{
     QString ip() const { return m_ip; }

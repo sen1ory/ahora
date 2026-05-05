@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import Ahora_app_qrcode
-import Ahora_core_ipadress
+import Ahora_core_ipaddress
 
 
 // Main.qml — главное окно приложения Ahora
@@ -19,9 +19,9 @@ Window {
     // Текущее состояние: "QR_VIEW" или "ADMIN_PANEL"
     property string currentView: "QR_VIEW"
 
-    // IP-адрес для QR-кода (получаем из IpAdress)
-    IpAdress {
-        id: ipAdress
+    // IP-адрес для QR-кода (получаем из IpAddress)
+    IpAddress {
+        id: ipAddress
     }
 
     // Авто-обновление IP каждые 2 секунды
@@ -30,7 +30,7 @@ Window {
         interval: 2000
         running: true
         repeat: true
-        onTriggered: ipAdress.refresh()
+        onTriggered: ipAddress.refresh()
     }
 
     // === Состояние 1: QR-код ===
@@ -61,7 +61,7 @@ Window {
                 topMargin: 8
                 horizontalCenter: parent.horizontalCenter
             }
-            text: "http://" + ipAdress.ip + ":8080/"
+            text: "http://" + ipAddress.ip + ":8080/"
             color: "#d79921"
             font.pixelSize: 14
             font.bold: true
@@ -78,15 +78,14 @@ Window {
             }
 
             // Формируем полный URL: http://IP:8080/
-            text: "http://" + ipAdress.ip + ":8080/"
+            text: "http://" + ipAddress.ip + ":8080/"
             autoIp: false       // Не используем autoIp — сами формируем URL
             foreground: "#ebdbb2"
             background: "#1d2021"
-            border: 6
         }
 
         // === Селектор IP: показывает все доступные адреса ===
-        // Нужен для случая, когда IpAdress не угадал сеть хотспота
+        // Нужен для случая, когда IpAddress не угадал сеть хотспота
         Text {
             id: ipsLabel
             anchors {
@@ -111,64 +110,83 @@ Window {
 
             // Динамически создаём кнопку на каждый IP
             Repeater {
-                model: ipAdress.allIps
+                model: ipAddress.allIps
 
                 Button {
                     required property string modelData
+                    // colors {{{
+                    readonly property color fontColor: (modelData === ipAddress.ip) ? "#1d2021" : "#ebdbb2"
+                    readonly property var baseColors: (modelData === ipAddress.ip)
+                                                        ? ["#d79921", "#fabd2f"]
+                                                        : ["#3c3836", "#665c54"]
+                    readonly property color hoverBaseColor: hovered ? baseColors[1] : baseColors[0]
+                    readonly property color borderColor: (modelData === ipAddress.ip) ? "#1d2021" : "#3c3836"
+                    // }}}
+
+                    hoverEnabled: true // for hover events
 
                     text: modelData
                     font.pixelSize: 13
-                    font.bold: (modelData === ipAdress.ip)
+                    font.bold: (modelData === ipAddress.ip)
 
                     // Стиль: выбранный IP — жёлтый, остальные — серые
                     contentItem: Text {
                         text: modelData
-                        color: (modelData === ipAdress.ip) ? "#1d2021" : "#ebdbb2"
                         font.pixelSize: 13
-                        font.bold: (modelData === ipAdress.ip)
+                        color: fontColor
+                        font.bold: (modelData === ipAddress.ip)
+
                         horizontalAlignment: Text.AlignHCenter
                         verticalAlignment: Text.AlignVCenter
                     }
 
                     background: Rectangle {
-                        color: (modelData === ipAdress.ip) ? "#d79921" : "#3c3836"
+                        color: hoverBaseColor
+                        border.color: borderColor
+
                         radius: 6
-                        border.color: "#504945"
                         border.width: 1
                     }
 
                     // При клике выбираем этот IP и обновляем QR
                     onClicked: {
-                        ipAdress.selectIp(modelData)
+                        ipAddress.selectIp(modelData)
                         console.log("Выбран IP:", modelData)
                     }
                 }
             }
 
-            // Кнопка обновления списка IP
             Button {
-                text: "🔄"
+                // colors {{{
+                readonly property color fontColor: "#ebdbb2"
+                readonly property var baseColors: ["#3c3836", "#665c54"]
+                readonly property color hoverBaseColor: hovered ? baseColors[1] : baseColors[0]
+                readonly property color borderColor: "#3c3836"
+                // }}}
+
+                hoverEnabled: true // for hover events
+
+                text: "↻"
                 font.pixelSize: 16
-                implicitWidth: 36
-                implicitHeight: 32
 
                 contentItem: Text {
                     text: "↻"
-                    color: "#ebdbb2"
+                    color: parent.fontColor
                     font.pixelSize: 18
                     horizontalAlignment: Text.AlignHCenter
                     verticalAlignment: Text.AlignVCenter
                 }
 
                 background: Rectangle {
-                    color: "#3c3836"
+                    color: parent.hoverBaseColor
+                    border.color: parent.borderColor
+
                     radius: 6
-                    border.color: "#504945"
                     border.width: 1
                 }
 
                 onClicked: {
-                    ipAdress.refresh()
+                    ipAddress.refresh()
                     console.log("Список IP обновлён")
                 }
             }
@@ -177,19 +195,29 @@ Window {
         // Кнопка перехода на панель администратора
         Button {
             id: startButton
+
+            // colors {{{
+            readonly property color fontColor: "#1d2021"
+            readonly property var baseColors: ["#d79921", "#fabd2f"]
+            readonly property color hoverBaseColor: hovered ? baseColors[1] : baseColors[0]
+            readonly property color borderColor: "#1d2021"
+            // }}}
+
+            hoverEnabled: true // for hover events
+
             anchors {
                 top: ipList.bottom
                 topMargin: 20
                 horizontalCenter: parent.horizontalCenter
             }
-            width: 260
+            width: 400
             height: 50
             text: "Перейти на страницу квиза"
 
             // Стилизация кнопки
             contentItem: Text {
                 text: startButton.text
-                color: "#1d2021"
+                color: parent.fontColor
                 font.bold: true
                 font.pixelSize: 16
                 horizontalAlignment: Text.AlignHCenter
@@ -197,8 +225,11 @@ Window {
             }
 
             background: Rectangle {
-                color: "#d79921"
+                color: parent.hoverBaseColor
+                border.color: parent.borderColor
+
                 radius: 8
+                border.width: 1
             }
 
             // При нажатии переключаемся на панель администратора
