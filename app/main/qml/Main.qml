@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import Ahora_app_qrcode
 import Ahora_core_ipaddress
+import Ahora_app_main
 
 
 // Main.qml — главное окно приложения Ahora
@@ -111,43 +112,14 @@ Window {
             Repeater {
                 model: ipAddress.allIps
 
-                Button {
+                GruvButton {
                     required property string modelData
-                    // colors {{{
-                    readonly property color fontColor: (modelData === ipAddress.ip) ? "#1d2021" : "#ebdbb2"
-                    readonly property var baseColors: (modelData === ipAddress.ip)
-                                                        ? ["#d79921", "#fabd2f"]
-                                                        : ["#3c3836", "#665c54"]
-                    readonly property color hoverBaseColor: hovered ? baseColors[1] : baseColors[0]
-                    readonly property color borderColor: (modelData === ipAddress.ip) ? "#1d2021" : "#3c3836"
-                    // }}}
 
-                    hoverEnabled: true // for hover events
+                    selected: modelData === ipAddress.ip
+                    fontSize: 13
 
                     text: modelData
-                    font.pixelSize: 13
-                    font.bold: (modelData === ipAddress.ip)
 
-                    // Стиль: выбранный IP — жёлтый, остальные — серые
-                    contentItem: Text {
-                        text: modelData
-                        font.pixelSize: 13
-                        color: fontColor
-                        font.bold: (modelData === ipAddress.ip)
-
-                        horizontalAlignment: Text.AlignHCenter
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    background: Rectangle {
-                        color: hoverBaseColor
-                        border.color: borderColor
-
-                        radius: 6
-                        border.width: 1
-                    }
-
-                    // При клике выбираем этот IP и обновляем QR
                     onClicked: {
                         ipAddress.selectIp(modelData)
                         console.log("Выбран IP:", modelData)
@@ -155,34 +127,9 @@ Window {
                 }
             }
 
-            Button {
-                // colors {{{
-                readonly property color fontColor: "#ebdbb2"
-                readonly property var baseColors: ["#3c3836", "#665c54"]
-                readonly property color hoverBaseColor: hovered ? baseColors[1] : baseColors[0]
-                readonly property color borderColor: "#3c3836"
-                // }}}
-
-                hoverEnabled: true // for hover events
-
+            GruvButton {
                 text: "↻"
-                font.pixelSize: 16
-
-                contentItem: Text {
-                    text: "↻"
-                    color: parent.fontColor
-                    font.pixelSize: 18
-                    horizontalAlignment: Text.AlignHCenter
-                    verticalAlignment: Text.AlignVCenter
-                }
-
-                background: Rectangle {
-                    color: parent.hoverBaseColor
-                    border.color: parent.borderColor
-
-                    radius: 6
-                    border.width: 1
-                }
+                fontSize: 13
 
                 onClicked: {
                     ipAddress.refresh()
@@ -191,18 +138,8 @@ Window {
             }
         }
 
-        // Кнопка перехода на панель администратора
-        Button {
+        GruvButton {
             id: startButton
-
-            // colors {{{
-            readonly property color fontColor: "#1d2021"
-            readonly property var baseColors: ["#d79921", "#fabd2f"]
-            readonly property color hoverBaseColor: hovered ? baseColors[1] : baseColors[0]
-            readonly property color borderColor: "#1d2021"
-            // }}}
-
-            hoverEnabled: true // for hover events
 
             anchors {
                 top: ipList.bottom
@@ -211,27 +148,11 @@ Window {
             }
             width: 400
             height: 50
+            radiusVal: 8
+            bold: true
+            fontSize: 16
             text: "Перейти на страницу квиза"
 
-            // Стилизация кнопки
-            contentItem: Text {
-                text: startButton.text
-                color: parent.fontColor
-                font.bold: true
-                font.pixelSize: 16
-                horizontalAlignment: Text.AlignHCenter
-                verticalAlignment: Text.AlignVCenter
-            }
-
-            background: Rectangle {
-                color: parent.hoverBaseColor
-                border.color: parent.borderColor
-
-                radius: 8
-                border.width: 1
-            }
-
-            // При нажатии переключаемся на панель администратора
             onClicked: {
                 currentView = "ADMIN_PANEL"
                 console.log("Переключились на панель администратора")
