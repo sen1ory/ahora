@@ -11,6 +11,7 @@ Button {
     property bool selectable: false
     property bool selected: false
     property string colorVariant: "gray"
+    // actualColorVariant acts as non-selected button color, when selectable on, it's gray, when off, it's colorVariant
     property string actualColorVariant: selectable ? "gray" : colorVariant
     // }}}
 
@@ -27,7 +28,6 @@ Button {
             "red":    [["#cc241d", "#fb4934"], ["#1d2021", "#1d2021"], "#cc241d"]
     }
 
-    // selectable button should be gray (but any possible)
     readonly property var _baseColors: {
         if (!enabled) return _variantColors["off"][0]
         if (selected) return _variantColors[colorVariant][0]
@@ -36,7 +36,7 @@ Button {
     }
     readonly property color _hoverBg: hovered ? _baseColors[1] : _baseColors[0]
 
-    readonly property color _fontColor: {
+    readonly property var _fontColor: {
         if (!enabled) return _variantColors["off"][1]
         if (selected) return _variantColors[colorVariant][1]
         if (!selected) return _variantColors[actualColorVariant][1]
@@ -44,7 +44,7 @@ Button {
     }
     readonly property color _hoverFontColor: hovered ? _fontColor[1] : _fontColor[0]
 
-    readonly property color _borderColor: {
+    readonly property var _borderColor: {
         if (!enabled) return _variantColors["off"][2]
         if (selected) return _variantColors[colorVariant][2]
         if (!selected) return _variantColors[actualColorVariant][2]

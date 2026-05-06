@@ -5,6 +5,7 @@ qt_add_qml_module(ahora_app_main
         qml/Main.qml
         qml/AdminPanel.qml
         qml/TeamCard.qml
+        qml/GruvButton.qml
 )
 
 add_executable(ahora

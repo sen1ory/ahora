@@ -101,6 +101,7 @@ Window {
         // Список IP-адресов — кликабельные кнопки
         Row {
             id: ipList
+
             anchors {
                 top: ipsLabel.bottom
                 topMargin: 6
@@ -114,11 +115,13 @@ Window {
 
                 GruvButton {
                     required property string modelData
-
-                    selected: modelData === ipAddress.ip
+                    text: modelData
                     fontSize: 13
 
-                    text: modelData
+                    selectable: true
+                    selected: modelData === ipAddress.ip
+
+                    colorVariant: "yellow"
 
                     onClicked: {
                         ipAddress.selectIp(modelData)
@@ -148,10 +151,14 @@ Window {
             }
             width: 400
             height: 50
+
+            text: "Перейти на страницу квиза"
+            fontSize: 16
+
             radiusVal: 8
             bold: true
-            fontSize: 16
-            text: "Перейти на страницу квиза"
+
+            colorVariant: "yellow"
 
             onClicked: {
                 currentView = "ADMIN_PANEL"

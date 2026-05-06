@@ -86,7 +86,7 @@ Rectangle {
         height: 50
         color: "#282828"
 
-        Button {
+        GruvButton {
             anchors {
                 left: parent.left
                 leftMargin: 12
@@ -94,13 +94,9 @@ Rectangle {
             }
             text: "← Назад"
             font.pixelSize: 14
-            flat: true
-            contentItem: Text {
-                text: "← Назад"
-                color: "#d79921"
-                font.pixelSize: 14
-            }
-            background: Item {}
+
+            colorVariant: "yellow"
+
             onClicked: panelRoot.goBack()
         }
 
@@ -196,13 +192,14 @@ Rectangle {
                 }
 
                 MenuItem {
-                    contentItem: Button {
-                        flat: true; font.pixelSize: 13
-                        contentItem: Text {
-                            text: "Установить"; color: "#1d2021"; font.bold: true; font.pixelSize: 13
-                            horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                        }
-                        background: Rectangle { color: "#d79921"; radius: 6 }
+                    contentItem: GruvButton {
+                        width: parent ? parent.width : undefined
+                        height: parent ? parent.height : undefined
+                        text: "Установить"
+                        fontSize: 13
+                        bold: true
+                        radiusVal: 6
+                        colorVariant: "yellow"
                         onClicked: {
                             timerMenu.close()
                             panelRoot.timerMinutes = minutesSpin.value
@@ -317,27 +314,27 @@ Rectangle {
                 color: "#a89984"; font.pixelSize: 16
             }
 
-            Button {
+            GruvButton {
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: panelRoot.timerPaused && !panelRoot.timerExpired
                 width: 200; height: 48
-                contentItem: Text {
-                    text: "Продолжить"; color: "#1d2021"; font.bold: true; font.pixelSize: 16
-                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                }
-                background: Rectangle { color: "#d79921"; radius: 8 }
+                text: "Продолжить"
+                fontSize: 16
+                bold: true
+                radiusVal: 8
+                colorVariant: "yellow"
                 onClicked: panelRoot.startTimer()
             }
 
-            Button {
+            GruvButton {
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: panelRoot.timerExpired
                 width: 200; height: 48
-                contentItem: Text {
-                    text: "Новый раунд"; color: "#1d2021"; font.bold: true; font.pixelSize: 16
-                    horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                }
-                background: Rectangle { color: "#458588"; radius: 8 }
+                text: "Новый раунд"
+                fontSize: 16
+                bold: true
+                radiusVal: 8
+                colorVariant: "blue"
                 onClicked: panelRoot.resetTimer()
             }
 
@@ -479,27 +476,23 @@ Rectangle {
                                         spacing: 8
                                         visible: index === 2 && SM.teamStatusesById(panelRoot.detailTeamId)[index] === "orange"
 
-                                        Button {
-                                            text: "✓ Верно"; height: 28
-                                            contentItem: Text {
-                                                text: "✓ Верно"
-                                                color: "#a5d6a7"; font.pixelSize: 12
-                                                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                                            }
-                                            background: Rectangle { color: "#1b5e20"; radius: 4 }
+                                        GruvButton {
+                                            text: "✓ Верно"
+                                            height: 28
+                                            fontSize: 12
+                                            radiusVal: 4
+                                            colorVariant: "green"
                                             onClicked: {
                                                 SM.approveTextAnswer(panelRoot.detailTeamId, index, true)
                                             }
                                         }
 
-                                        Button {
-                                            text: "✗ Неверно"; height: 28
-                                            contentItem: Text {
-                                                text: "✗ Неверно"
-                                                color: "#ef9a9a"; font.pixelSize: 12
-                                                horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                                            }
-                                            background: Rectangle { color: "#b71c1c"; radius: 4 }
+                                        GruvButton {
+                                            text: "✗ Неверно"
+                                            height: 28
+                                            fontSize: 12
+                                            radiusVal: 4
+                                            colorVariant: "red"
                                             onClicked: {
                                                 SM.approveTextAnswer(panelRoot.detailTeamId, index, false)
                                             }
@@ -537,13 +530,12 @@ Rectangle {
                         background: Rectangle { color: "#3c3836"; radius: 4 }
                     }
 
-                    Button {
+                    GruvButton {
                         text: "Сохранить"
-                        contentItem: Text {
-                            text: "Сохранить"; color: "#1d2021"; font.bold: true; font.pixelSize: 13
-                            horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                        }
-                        background: Rectangle { color: "#d79921"; radius: 6 }
+                        fontSize: 13
+                        bold: true
+                        radiusVal: 6
+                        colorVariant: "yellow"
                         onClicked: {
                             SM.setScore(panelRoot.detailTeamId, 0, scoreSpin.value)
                             console.log("Сохранено", scoreSpin.value, "баллов для", panelRoot.detailTeamId)
@@ -552,15 +544,13 @@ Rectangle {
                 }
 
                 // Close button
-                Button {
+                GruvButton {
                     Layout.alignment: Qt.AlignHCenter
                     Layout.preferredWidth: 200
                     text: "Закрыть"
-                    contentItem: Text {
-                        text: "Закрыть"; color: "#ebdbb2"; font.pixelSize: 14
-                        horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
-                    }
-                    background: Rectangle { color: "#504945"; radius: 6 }
+                    fontSize: 14
+                    radiusVal: 6
+                    colorVariant: "gray"
                     onClicked: panelRoot.closeTeamDetail()
                 }
             }
