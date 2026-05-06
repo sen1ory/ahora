@@ -44,8 +44,9 @@ Rectangle {
     }
 
     function formatTime(secs) {
-        var m = Math.floor(secs / 60)
-        var s = secs % 60
+        var validSecs = Math.max(0, secs)
+        var m = Math.floor(validSecs / 60)
+        var s = validSecs % 60
         return (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s
     }
 
@@ -71,7 +72,7 @@ Rectangle {
         panelRoot.timerRunning = false
         panelRoot.timerPaused = false
         panelRoot.timerExpired = false
-        SM.broadcastTimerAction("resume")
+        SM.broadcastTimerAction("reset")
     }
 
     // Верхняя панель с заголовком, счётчиком и кнопкой "Назад"

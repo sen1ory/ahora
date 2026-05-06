@@ -1,5 +1,5 @@
 #include "../include/SessionManager.h"
-#include "../include/QuizDef.h"
+#include "../include/QuizLoader.h"
 #include <QWebSocket>
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -9,8 +9,9 @@
 SessionManager::SessionManager(QObject *parent)
     : QAbstractListModel(parent)
 {
+    m_quizQuestions = loadQuizFromFile();
     m_questions.clear();
-    for (const auto &q : s_quizQuestions) {
+    for (const auto &q : m_quizQuestions) {
         m_questions.append(q.text);
     }
 }
@@ -35,6 +36,8 @@ QVariant SessionManager::data(const QModelIndex &index, int role) const {
         return team->id;
     case AnswersRole:
         return team->answers;
+    case ScoreRole:
+        return team->score;
     default:
         return {};
     }
@@ -45,7 +48,8 @@ QHash<int, QByteArray> SessionManager::roleNames() const {
         {NameRole,     "name"},
         {StatusesRole, "statuses"},
         {TeamIdRole,   "teamId"},
-        {AnswersRole,  "answers"}
+        {AnswersRole,  "answers"},
+        {ScoreRole,    "score"}
     };
 }
 
@@ -90,10 +94,22 @@ QString SessionManager::teamNameById(const QString &teamId) const {
     return {};
 }
 
+int SessionManager::teamScoreById(const QString &teamId) const {
+    for (const auto *team : m_teams) {
+        if (team->id == teamId) return team->score;
+    }
+    return 0;
+}
+
 void SessionManager::setScore(const QString &teamId, int questionId, int score) {
-    Q_UNUSED(teamId)
-    Q_UNUSED(questionId)
-    Q_UNUSED(score)
+    for (int i = 0; i < m_teams.size(); ++i) {
+        if (m_teams[i]->id == teamId) {
+            m_teams[i]->score = score;
+            QModelIndex idx = index(i);
+            emit dataChanged(idx, idx, {ScoreRole});
+            return;
+        }
+    }
 }
 
 void SessionManager::approveTextAnswer(const QString &teamId, int questionId, bool correct) {

@@ -6,6 +6,10 @@
 #include <QHash>
 #include <QString>
 #include <QStringList>
+#include <QVector>
+#include "QuizDef.h"
+#include <QVector>
+#include "QuizDef.h"
 
 
 class QWebSocket;
@@ -17,6 +21,7 @@ struct TeamData {
     QString name;            // Имя команды
     QStringList statuses;    // Статусы ответов (3 шт): "white","green","red","orange"
     QStringList answers;     // Тексты ответов на каждый вопрос
+    int score = 0;           // Баллы команды
     QWebSocket *socket;      // Сокет для отправки сообщений клиенту
 };
 
@@ -33,7 +38,8 @@ public:
         NameRole = Qt::UserRole + 1,
         StatusesRole,
         TeamIdRole,
-        AnswersRole
+        AnswersRole,
+        ScoreRole
     };
     // }}}
 
@@ -50,6 +56,8 @@ public:
     QStringList questions() const { return m_questions; }
     // }}}
 
+    const QVector<QuestionDef> &quizQuestions() const { return m_quizQuestions; }
+
     // Доступ к данным команды по строке {{{
     Q_INVOKABLE QString teamName(int row) const;
     Q_INVOKABLE QStringList teamStatuses(int row) const;
@@ -61,6 +69,7 @@ public:
     Q_INVOKABLE QStringList teamAnswersById(const QString &teamId) const;
     Q_INVOKABLE QStringList teamStatusesById(const QString &teamId) const;
     Q_INVOKABLE QString teamNameById(const QString &teamId) const;
+    Q_INVOKABLE int teamScoreById(const QString &teamId) const;
     // }}}
 
     // Установка баллов за вопрос {{{
@@ -91,6 +100,7 @@ signals:
 private:
     QList<TeamData *> m_teams;
     QStringList m_questions;   // Тексты вопросов для QML
+    QVector<QuestionDef> m_quizQuestions;
 };
 
 

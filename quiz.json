@@ -1,0 +1,22 @@
+{
+  "questions": [
+    {
+      "type": "single",
+      "text": "Какая планета самая большая?",
+      "options": ["Марс", "Юпитер", "Венера"],
+      "correct": ["Юпитер"]
+    },
+    {
+      "type": "multiple",
+      "text": "Какие из этих языков компилируемые?",
+      "options": ["Python", "C++", "JavaScript", "Rust"],
+      "correct": ["C++", "Rust"]
+    },
+    {
+      "type": "text",
+      "text": "Напишите название столицы Франции",
+      "options": [],
+      "correct": []
+    }
+  ]
+}

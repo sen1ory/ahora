@@ -201,11 +201,80 @@ button:disabled {
     <p id="overlaySubtext">Подождите, администратор скоро продолжит</p>
 </div>
 
+<!-- Баннер переподключения -->
+<div id="reconnectBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#b71c1c;color:#fff;padding:12px;text-align:center;font-size:14px;z-index:10000;"></div>
+
 <script>
 let ws = null;
 let teamName = '';
 let teamId = '';
 let quizQuestions = [];
+let reconnectAttempts = 0;
+let reconnectTimer = null;
+
+function getWsUrl() {
+    const host = window.location.hostname;
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    return wsProtocol + '//' + host + ':8081';
+}
+
+function connectWs() {
+    ws = new WebSocket(getWsUrl());
+
+    ws.onopen = function() {
+        if (reconnectAttempts > 0) {
+            document.getElementById('reconnectBanner').style.display = 'none';
+            reconnectAttempts = 0;
+            ws.send(JSON.stringify({ type: 'join', name: teamName }));
+        } else {
+            ws.send(JSON.stringify({ type: 'join', name: teamName }));
+        }
+    };
+
+    ws.onmessage = function(event) {
+        try {
+            const msg = JSON.parse(event.data);
+            handleMessage(msg);
+        } catch(e) {
+            console.error('Ошибка парсинга сообщения:', e);
+        }
+    };
+
+    ws.onerror = function() {
+        if (!teamId && reconnectAttempts === 0) {
+            document.getElementById('joinBtn').disabled = false;
+            const error = document.getElementById('joinError');
+            error.textContent = 'Не удалось подключиться к серверу';
+            error.style.display = 'block';
+        }
+    };
+
+    ws.onclose = function() {
+        if (teamId && reconnectAttempts < 5) {
+            scheduleReconnect();
+        } else if (reconnectAttempts >= 5) {
+            showReconnectBanner('Соединение потеряно. Обновите страницу.');
+        } else {
+            console.log('WebSocket закрыт');
+        }
+    };
+}
+
+function scheduleReconnect() {
+    reconnectAttempts++;
+    var delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 16000);
+    showReconnectBanner('Переподключение... (попытка ' + reconnectAttempts + '/5)');
+    if (reconnectTimer) clearTimeout(reconnectTimer);
+    reconnectTimer = setTimeout(function() {
+        connectWs();
+    }, delay);
+}
+
+function showReconnectBanner(text) {
+    var banner = document.getElementById('reconnectBanner');
+    banner.textContent = text;
+    banner.style.display = 'block';
+}
 
 // Функция входа: соединяемся через WebSocket и отправляем join
 function join() {
@@ -221,40 +290,7 @@ function join() {
     document.getElementById('joinError').style.display = 'none';
     teamName = name;
 
-    // Определяем адрес WebSocket-сервера (тот же хост, порт 8081)
-    const host = window.location.hostname;
-    const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = wsProtocol + '//' + host + ':8081';
-
-    ws = new WebSocket(wsUrl);
-
-    ws.onopen = function() {
-        // Отправляем запрос на присоединение
-        ws.send(JSON.stringify({
-            type: 'join',
-            name: teamName
-        }));
-    };
-
-    ws.onmessage = function(event) {
-        try {
-            const msg = JSON.parse(event.data);
-            handleMessage(msg);
-        } catch(e) {
-            console.error('Ошибка парсинга сообщения:', e);
-        }
-    };
-
-    ws.onerror = function() {
-        document.getElementById('joinBtn').disabled = false;
-        const error = document.getElementById('joinError');
-        error.textContent = 'Не удалось подключиться к серверу';
-        error.style.display = 'block';
-    };
-
-    ws.onclose = function() {
-        console.log('WebSocket закрыт');
-    };
+    connectWs();
 }
 
 // Обработка входящих сообщений от сервера
@@ -448,7 +484,7 @@ function handleTimerAction(action) {
         title.textContent = 'ПАУЗА';
         subtext.textContent = 'Подождите, администратор скоро продолжит';
         overlay.style.display = 'flex';
-    } else if (action === 'resume') {
+    } else if (action === 'resume' || action === 'reset') {
         overlay.style.display = 'none';
     } else if (action === 'timeout') {
         title.textContent = 'ВРЕМЯ ВЫШЛО';

@@ -5,13 +5,7 @@ using namespace qrcodegen;
 
 QRCodeItem::QRCodeItem(QQuickItem *parent)
     : QQuickPaintedItem(parent)
-    , m_ipAddress(new IpAddress(this))
 {
-    connect(m_ipAddress, &IpAddress::ipChanged, this, [this]() {
-        if (m_autoIp) {
-            setText(m_ipAddress->ip());
-        }
-    });
 }
 
 void QRCodeItem::setText(const QString &text) {
@@ -47,17 +41,6 @@ void QRCodeItem::setBorder(int border) {
         emit borderChanged();
         generateQRImage();
         update();
-    }
-}
-
-void QRCodeItem::setAutoIp(bool autoIp) {
-    if (m_autoIp != autoIp) {
-        m_autoIp = autoIp;
-        emit autoIpChanged();
-        if (m_autoIp) {
-            m_ipAddress->refresh();
-            setText(m_ipAddress->ip());
-        }
     }
 }
 

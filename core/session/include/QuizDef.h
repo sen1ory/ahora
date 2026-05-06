@@ -5,6 +5,8 @@
 #include <QString>
 #include <QStringList>
 #include <QVector>
+#include <QSet>
+#include <QSet>
 
 
 // Структура одного вопроса квиза
@@ -15,6 +17,26 @@ struct QuestionDef {
     QStringList options; // Варианты ответов (пусто для text)
     QStringList correct; // Правильные ответы (пусто для text, проверяется вручную)
 };
+
+inline QString checkQuizAnswer(const QVector<QuestionDef> &quiz, int questionId, const QStringList &answers) {
+    if (questionId < 0 || questionId >= quiz.size())
+        return "white";
+
+    const auto &q = quiz[questionId];
+
+    if (q.type == "text") {
+        return "orange";
+    }
+
+    QSet<QString> userSet(answers.begin(), answers.end());
+    QSet<QString> correctSet(q.correct.begin(), q.correct.end());
+
+    if (userSet == correctSet) {
+        return "green";
+    } else {
+        return "red";
+    }
+}
 
 // Жёстко заданные 3 вопроса квиза
 inline const QVector<QuestionDef> s_quizQuestions = {

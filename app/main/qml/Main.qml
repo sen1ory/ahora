@@ -79,7 +79,6 @@ Window {
 
             // Формируем полный URL: http://IP:8080/
             text: "http://" + ipAddress.ip + ":8080/"
-            autoIp: false       // Не используем autoIp — сами формируем URL
             foreground: "#ebdbb2"
             background: "#1d2021"
         }

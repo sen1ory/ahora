@@ -25,4 +25,5 @@ target_link_libraries(ahora PRIVATE
     ahora_core_session
     ahora_core_wsserver
     ahora_core_httpserver
+    ahora_core_ipaddress
 )

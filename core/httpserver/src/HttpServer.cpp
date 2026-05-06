@@ -1,5 +1,7 @@
 #include "../include/HttpServer.h"
 #include "web_content.h"
+#include <QHostAddress>
+#include <QHostAddress>
 
 
 HttpServer::HttpServer(quint16 port, QObject *parent)

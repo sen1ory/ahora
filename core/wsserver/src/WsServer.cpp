@@ -110,7 +110,8 @@ void WsServer::handleJoin(QWebSocket *socket, const QJsonObject &msg) {
     QJsonObject quizMsg;
     quizMsg["type"] = "quiz";
     QJsonArray questions;
-    for (const auto &q : s_quizQuestions) {
+    const auto &quizDefs = m_sessionManager->quizQuestions();
+    for (const auto &q : quizDefs) {
         QJsonObject qObj;
         qObj["id"] = q.id;
         qObj["type"] = q.type;
@@ -134,7 +135,7 @@ void WsServer::handleAnswer(QWebSocket *socket, const QJsonObject &msg) {
     if (teamId.isEmpty()) return;
 
     int questionId = msg.value("questionId").toInt(-1);
-    if (questionId < 0 || questionId >= s_quizQuestions.size()) return;
+    if (questionId < 0 || questionId >= m_sessionManager->quizQuestions().size()) return;
 
     // Собираем ответы из JSON массива
     QJsonArray answersArr = msg.value("answers").toArray();
@@ -164,23 +165,5 @@ void WsServer::handleAnswer(QWebSocket *socket, const QJsonObject &msg) {
 
 // Проверка ответа: возвращает "green", "red" или "orange"
 QString WsServer::checkAnswer(int questionId, const QStringList &answers) const {
-    if (questionId < 0 || questionId >= s_quizQuestions.size())
-        return "white";
-
-    const auto &q = s_quizQuestions[questionId];
-
-    if (q.type == "text") {
-        // Текстовый ответ — проверяется админом вручную позже
-        return "orange";
-    }
-
-    // Для single/multiple: сравниваем множества ответов
-    QSet<QString> userSet(answers.begin(), answers.end());
-    QSet<QString> correctSet(q.correct.begin(), q.correct.end());
-
-    if (userSet == correctSet) {
-        return "green";
-    } else {
-        return "red";
-    }
+    return checkQuizAnswer(m_sessionManager->quizQuestions(), questionId, answers);
 }
