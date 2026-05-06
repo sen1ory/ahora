@@ -107,48 +107,54 @@ Rectangle {
             font.bold: true
             font.pixelSize: 16
         }
-
+        // Счётчик команд
+        Text {
+            anchors {
+                right: parent.right
+                rightMargin: 150
+                verticalCenter: parent.verticalCenter
+            }
+            text: "Команд: " + SM.teamCount
+            color: "#a89984"
+            font.pixelSize: 13
+        }
         // Таймер
-        Item {
+        GruvButton {
+            id: timerButton
             anchors {
                 right: parent.right
                 rightMargin: 12
                 verticalCenter: parent.verticalCenter
             }
-            width: timerText.implicitWidth + 20
-            height: parent.height
+            text: panelRoot.formatTime(panelRoot.remainingSeconds)
+            fontSize: 18
+            bold: panelRoot.timerRunning || panelRoot.timerPaused || panelRoot.timerExpired
+            letterSpacing: 2
 
-            Text {
-                id: timerText
-                anchors.centerIn: parent
-                text: panelRoot.formatTime(panelRoot.remainingSeconds)
-                color: {
-                    if (panelRoot.timerExpired) return "#cc241d"
-                    if (panelRoot.timerRunning) return "#d79921"
-                    if (panelRoot.timerPaused) return "#fabd2f"
-                    return "#665c54"
-                }
-                font.bold: panelRoot.timerRunning || panelRoot.timerPaused || panelRoot.timerExpired
-                font.pixelSize: 18
-                font.letterSpacing: 2
+            radiusVal: 6
+
+            colorVariant: {
+                if (panelRoot.timerExpired) return "red"
+                if (panelRoot.timerRunning) return "green"
+                if (panelRoot.timerPaused)  return "yellow"
+                return "blue"
             }
 
-            MouseArea {
-                anchors.fill: parent
-                acceptedButtons: Qt.LeftButton | Qt.RightButton
-
-                onClicked: function(mouse) {
-                    if (mouse.button === Qt.LeftButton) {
-                        if (panelRoot.timerExpired) return
-                        if (panelRoot.timerRunning) { panelRoot.pauseTimer() }
-                        else if (panelRoot.timerPaused) { panelRoot.startTimer() }
-                        else { panelRoot.startTimer() }
-                    } else if (mouse.button === Qt.RightButton) {
-                        timerMenu.popup()
-                    }
-                }
+            // left click: start/pause
+            onClicked: {
+                if (panelRoot.timerExpired) return
+                if (panelRoot.timerRunning) { panelRoot.pauseTimer() }
+                else if (panelRoot.timerPaused) { panelRoot.startTimer() }
+                else { panelRoot.startTimer() }
             }
 
+            // right click: context menu
+            TapHandler {
+                acceptedButtons: Qt.RightButton
+                onTapped: timerMenu.popup()
+            }
+
+            // The settings menu (unchanged from original, but now inside the button)
             Menu {
                 id: timerMenu
 
@@ -210,18 +216,6 @@ Rectangle {
                     implicitWidth: 260; implicitHeight: 40
                 }
             }
-        }
-
-        // Счётчик команд
-        Text {
-            anchors {
-                right: parent.right
-                rightMargin: 100
-                verticalCenter: parent.verticalCenter
-            }
-            text: "Команд: " + SM.teamCount
-            color: "#a89984"
-            font.pixelSize: 13
         }
     }
 
