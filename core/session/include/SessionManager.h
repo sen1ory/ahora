@@ -63,6 +63,7 @@ public:
     Q_INVOKABLE QStringList teamStatuses(int row) const;
     Q_INVOKABLE QString teamId(int row) const;
     Q_INVOKABLE QStringList teamAnswers(int row) const;
+    Q_INVOKABLE QVariantMap getTeamDataMap(const QString &teamId) const;
     // }}}
 
     // Доступ к данным команды по UUID {{{
@@ -96,6 +97,7 @@ public:
 
 signals:
     void teamCountChanged();
+    void teamDataChanged(const QString &teamId);
 
 private:
     QList<TeamData *> m_teams;

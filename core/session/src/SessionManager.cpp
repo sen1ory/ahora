@@ -101,12 +101,27 @@ int SessionManager::teamScoreById(const QString &teamId) const {
     return 0;
 }
 
+QVariantMap SessionManager::getTeamDataMap(const QString &teamId) const {
+    QVariantMap map;
+    for (auto *team : m_teams) {
+        if (team->id == teamId) {
+            map["name"] = team->name;
+            map["statuses"] = team->statuses;    // QStringList → QML array
+            map["answers"] = team->answers;      // QStringList → QML array
+            map["score"] = team->score;
+            break;
+        }
+    }
+    return map;
+}
+
 void SessionManager::setScore(const QString &teamId, int questionId, int score) {
     for (int i = 0; i < m_teams.size(); ++i) {
         if (m_teams[i]->id == teamId) {
             m_teams[i]->score = score;
             QModelIndex idx = index(i);
             emit dataChanged(idx, idx, {ScoreRole});
+            emit teamDataChanged(teamId);
             return;
         }
     }
@@ -118,6 +133,7 @@ void SessionManager::approveTextAnswer(const QString &teamId, int questionId, bo
             m_teams[i]->statuses[questionId] = correct ? "green" : "red";
             QModelIndex idx = index(i);
             emit dataChanged(idx, idx, {StatusesRole});
+            emit teamDataChanged(teamId);
 
             if (m_teams[i]->socket && m_teams[i]->socket->isValid()) {
                 QJsonObject result;
@@ -161,6 +177,7 @@ void SessionManager::updateAnswer(const QString &teamId, int questionId, const Q
             }
             QModelIndex idx = index(i);
             emit dataChanged(idx, idx, {StatusesRole, AnswersRole});
+            emit teamDataChanged(teamId);
 
             qInfo().noquote() << "[SessionManager] Ответ от" << m_teams[i]->name
                               << "на вопрос" << questionId
