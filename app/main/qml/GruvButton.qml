@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import Ahora_app_main
 
 Button {
     id: root
@@ -16,24 +17,49 @@ Button {
 
     // custom color support {{{
     property bool useCustomColors: false
-    property color customBg: "#282828"
-    property color customBgHover: "#282828"
-    property color customFont: "#ebdbb2"
-    property color customFontHover: "#ebdbb2"
-    property color customBorder: "#3c3836"
+    property color customBg:         AhoraTheme.bgMedium
+    property color customBgHover:    AhoraTheme.bgMedium
+    property color customFont:       AhoraTheme.textPrimary
+    property color customFontHover:  AhoraTheme.textPrimary
+    property color customBorder:     AhoraTheme.bgBorder
     // }}}
 
     hoverEnabled: true
 
     // color maps {{{
     readonly property var _variantColors: {
-        "off":    [["#282828", "#282828"], ["#504945", "#504945"], "#3c3836"],
-        "gray":   [["#3c3836", "#665c54"], ["#ebdbb2", "#ebdbb2"], "#3c3836"],
-        "blue":   [["#458588", "#83a598"], ["#1d2021", "#1d2021"], "#458588"],
-        "aqua":   [["#689d6a", "#8ec07c"], ["#1d2021", "#1d2021"], "#689d6a"],
-        "green":  [["#98971a", "#b8bb26"], ["#1d2021", "#1d2021"], "#98971a"],
-        "yellow": [["#d79921", "#fabd2f"], ["#1d2021", "#1d2021"], "#d79921"],
-        "red":    [["#cc241d", "#fb4934"], ["#1d2021", "#1d2021"], "#cc241d"]
+        "off":    [[AhoraTheme.bgMedium, AhoraTheme.bgMedium],
+                   [AhoraTheme.textMuted, AhoraTheme.textMuted],
+                   AhoraTheme.bgBorder],
+
+        "gray":   [[AhoraTheme.bgBorder, AhoraTheme.bgMuted],
+                   [AhoraTheme.textPrimary, AhoraTheme.textPrimary],
+                   AhoraTheme.bgBorder],
+
+        "red":    [[AhoraTheme.accentRed, AhoraTheme.accentRedBright],
+                   [AhoraTheme.bgDark, AhoraTheme.bgDark],
+                   AhoraTheme.accentRed],
+
+        "orange": [[AhoraTheme.accentOrange, AhoraTheme.accentOrangeBright],
+                   [AhoraTheme.bgDark, AhoraTheme.bgDark],
+                   AhoraTheme.accentRed],
+
+        "yellow": [[AhoraTheme.accentYellow, AhoraTheme.accentYellowBright],
+                   [AhoraTheme.bgDark, AhoraTheme.bgDark],
+                   AhoraTheme.accentYellow],
+
+        "green":  [[AhoraTheme.accentGreen, AhoraTheme.accentGreenBright],
+                   [AhoraTheme.bgDark, AhoraTheme.bgDark],
+                   AhoraTheme.accentGreen],
+
+
+        "aqua":   [[AhoraTheme.accentAqua, AhoraTheme.accentAquaBright],
+                   [AhoraTheme.bgDark, AhoraTheme.bgDark],
+                   AhoraTheme.accentAqua],
+
+        "blue":   [[AhoraTheme.accentBlue, AhoraTheme.accentBlueBright],
+                   [AhoraTheme.bgDark, AhoraTheme.bgDark],
+                   AhoraTheme.accentBlue]
     }
     // }}}
 

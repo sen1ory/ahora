@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import Ahora_app_main
 
 
 // TeamCard — карточка одной команды на панели администратора
@@ -72,10 +73,10 @@ Rectangle {
                     anchors.verticalCenter: parent.verticalCenter
 
                     color: {
-                        if (status === "green")  return "#00CC66"
-                        if (status === "red")    return "#FF4444"
-                        if (status === "orange") return "#FF8800"
-                        return "#665c54"
+                        if (status === "green")  return AhoraTheme.accentGreen
+                        if (status === "red")    return AhoraTheme.accentRed
+                        if (status === "orange") return AhoraTheme.accentOrange
+                        return AhoraTheme.bgMuted
                     }
                 }
 

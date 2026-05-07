@@ -15,7 +15,7 @@ Rectangle {
         console.log("AdminPanel создан, teamCount:", SM ? SM.teamCount : "null")
     }
 
-    color: "#1d2021"
+    color: AhoraTheme.bgDark
 
     // === Таймер ===
     property int timerMinutes: 5
@@ -84,7 +84,7 @@ Rectangle {
             right: parent.right
         }
         height: 50
-        color: "#282828"
+        color: AhoraTheme.bgMedium
 
         GruvButton {
             anchors {
@@ -103,7 +103,7 @@ Rectangle {
         Text {
             anchors.centerIn: parent
             text: "Панель администратора"
-            color: "#ebdbb2"
+            color: AhoraTheme.textPrimary
             font.bold: true
             font.pixelSize: 16
         }
@@ -154,7 +154,7 @@ Rectangle {
                 onTapped: timerMenu.popup()
             }
 
-            // The settings menu (unchanged from original, but now inside the button)
+            // the settings menu (unchanged from original, but now inside the button)
             Menu {
                 id: timerMenu
 
@@ -170,13 +170,13 @@ Rectangle {
                             editable: true; width: 70; height: 28
                             contentItem: Text {
                                 text: minutesSpin.textFromValue(minutesSpin.value, minutesSpin.locale)
-                                color: "#ebdbb2"; font.pixelSize: 13
+                                color: AhoraTheme.textPrimary; font.pixelSize: 13
                                 horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                             }
-                            background: Rectangle { color: "#3c3836"; radius: 4 }
+                            background: Rectangle { color: AhoraTheme.bgBorder; radius: 4 }
                         }
 
-                        Text { text: "мин"; color: "#a89984"; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
+                        Text { text: "мин"; color: AhoraTheme.textSecondary; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
 
                         SpinBox {
                             id: secondsSpin
@@ -188,12 +188,12 @@ Rectangle {
                                 color: "#ebdbb2"; font.pixelSize: 13
                                 horizontalAlignment: Text.AlignHCenter; verticalAlignment: Text.AlignVCenter
                             }
-                            background: Rectangle { color: "#3c3836"; radius: 4 }
+                            background: Rectangle { color: AhoraTheme.bgBorder; radius: 4 }
                         }
 
-                        Text { text: "сек"; color: "#a89984"; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
+                        Text { text: "сек"; color: Ahora; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
                     }
-                    background: Rectangle { color: "#282828"; radius: 6; border.color: "#504945"; border.width: 1 }
+                    background: Rectangle { color: AhoraTheme.bgMedium; radius: 6; border.color: AhoraTheme.bgBorderLight; border.width: 1 }
                     implicitWidth: 260; implicitHeight: 40
                 }
 
@@ -203,9 +203,12 @@ Rectangle {
                         height: parent ? parent.height : undefined
                         text: "Установить"
                         fontSize: 13
+
                         bold: true
-                        radiusVal: 6
                         colorVariant: "yellow"
+
+                        radiusVal: 6
+
                         onClicked: {
                             timerMenu.close()
                             panelRoot.timerMinutes = minutesSpin.value
@@ -213,6 +216,7 @@ Rectangle {
                             panelRoot.resetTimer()
                         }
                     }
+                    background: Rectangle { color: AhoraTheme.bgDark; radius: 6; border.color: AhoraTheme.bgBorderLight; border.width: 1 }
                     implicitWidth: 260; implicitHeight: 40
                 }
             }
@@ -251,7 +255,7 @@ Rectangle {
                     Text {
                         anchors.centerIn: parent
                         text: "⏳ Ожидание подключения команд..."
-                        color: "#a89984"; font.pixelSize: 15
+                        color: AhoraTheme.textSecondary; font.pixelSize: 15
                     }
                 }
 
@@ -276,68 +280,6 @@ Rectangle {
             }
 
             Item { Layout.fillHeight: true }
-        }
-    }
-
-    // === Оверлей паузы / время вышло ===
-    Rectangle {
-        id: overlay
-        anchors.fill: parent
-        color: "#cc000000"
-        visible: panelRoot.timerPaused || panelRoot.timerExpired
-        z: 999
-
-        MouseArea { anchors.fill: parent; hoverEnabled: true }
-
-        Column {
-            anchors.centerIn: parent
-            spacing: 20
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: panelRoot.timerExpired ? "ВРЕМЯ ВЫШЛО" : "ПАУЗА"
-                color: panelRoot.timerExpired ? "#cc241d" : "#fabd2f"
-                font.bold: true; font.pixelSize: 48; font.letterSpacing: 4
-            }
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: panelRoot.timerExpired
-                    ? "Квиз завершён. Закройте страницу на телефоне."
-                    : "Администратор скоро продолжит."
-                color: "#a89984"; font.pixelSize: 16
-            }
-
-            GruvButton {
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: panelRoot.timerPaused && !panelRoot.timerExpired
-                width: 200; height: 48
-                text: "Продолжить"
-                fontSize: 16
-                bold: true
-                radiusVal: 8
-                colorVariant: "yellow"
-                onClicked: panelRoot.startTimer()
-            }
-
-            GruvButton {
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: panelRoot.timerExpired
-                width: 200; height: 48
-                text: "Новый раунд"
-                fontSize: 16
-                bold: true
-                radiusVal: 8
-                colorVariant: "blue"
-                onClicked: panelRoot.resetTimer()
-            }
-
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: panelRoot.timerPaused && !panelRoot.timerExpired
-                text: "Осталось: " + panelRoot.formatTime(panelRoot.remainingSeconds)
-                color: "#665c54"; font.pixelSize: 14
-            }
         }
     }
 

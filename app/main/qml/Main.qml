@@ -5,10 +5,8 @@ import Ahora_core_ipaddress
 import Ahora_app_main
 
 
-// Main.qml — главное окно приложения Ahora
-// Два состояния:
-//   1. QR_VIEW — показывает QR-код для подключения клиентов + список IP
-//   2. ADMIN_PANEL — панель администратора со списком команд
+//   1. QR_VIEW
+//   2. ADMIN_PANEL
 Window {
     id: root
     width: 800
@@ -17,16 +15,15 @@ Window {
     visible: true
     title: "Ahora — Квиз"
 
-    // Текущее состояние: "QR_VIEW" или "ADMIN_PANEL"
+    // start with
     property string currentView: "QR_VIEW"
 
-    // IP-адрес для QR-кода (получаем из IpAddress)
+    // get ip first
     IpAddress {
         id: ipAddress
     }
 
-    // Авто-обновление IP каждые 2 секунды
-    // Нужно для случая, когда прога запущена ДО подключения к хотспоту
+    // refresh ip every 2 seconds
     Timer {
         interval: 2000
         running: true
@@ -34,11 +31,11 @@ Window {
         onTriggered: ipAddress.refresh()
     }
 
-    // === Состояние 1: QR-код ===
+    // show qr-code
     Rectangle {
         id: qrView
         anchors.fill: parent
-        color: "#1d2021"
+        color: AhoraTheme.bgDark
         visible: currentView === "QR_VIEW"
 
         // Текст-инструкция
@@ -50,7 +47,7 @@ Window {
                 horizontalCenter: parent.horizontalCenter
             }
             text: "Отсканируйте QR-код чтобы подключиться к квизу"
-            color: "#a89984"
+            color: AhoraTheme.bgBorderLight
             font.pixelSize: 16
         }
 
@@ -63,7 +60,7 @@ Window {
                 horizontalCenter: parent.horizontalCenter
             }
             text: "http://" + ipAddress.ip + ":8080/"
-            color: "#d79921"
+            color: AhoraTheme.accentYellow
             font.pixelSize: 14
             font.bold: true
         }
@@ -80,8 +77,8 @@ Window {
 
             // Формируем полный URL: http://IP:8080/
             text: "http://" + ipAddress.ip + ":8080/"
-            foreground: "#ebdbb2"
-            background: "#1d2021"
+            foreground: AhoraTheme.textPrimary
+            background: AhoraTheme.bgDark
         }
 
         // === Селектор IP: показывает все доступные адреса ===
@@ -94,7 +91,7 @@ Window {
                 horizontalCenter: parent.horizontalCenter
             }
             text: "Доступные адреса (нажмите чтобы выбрать):"
-            color: "#a89984"
+            color: AhoraTheme.bgBorderLight
             font.pixelSize: 12
         }
 
