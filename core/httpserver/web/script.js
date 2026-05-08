@@ -5,12 +5,14 @@ let quizQuestions = [];
 let reconnectAttempts = 0;
 let reconnectTimer = null;
 
+// getWsUrl {{{
 function getWsUrl() {
     const host = window.location.hostname;
     const wsProtocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     return wsProtocol + '//' + host + ':8081';
 }
-
+// }}}
+// connectWs {{{
 function connectWs() {
     ws = new WebSocket(getWsUrl());
 
@@ -52,7 +54,8 @@ function connectWs() {
         }
     };
 }
-
+// }}}
+// scheduleReconnect {{{
 function scheduleReconnect() {
     reconnectAttempts++;
     var delay = Math.min(1000 * Math.pow(2, reconnectAttempts - 1), 16000);
@@ -62,13 +65,15 @@ function scheduleReconnect() {
         connectWs();
     }, delay);
 }
-
+// }}}
+// showReconnectBanner {{{
 function showReconnectBanner(text) {
     var banner = document.getElementById('reconnectBanner');
     banner.textContent = text;
     banner.style.display = 'block';
 }
-
+// }}}
+// join {{{
 function join() {
     const name = document.getElementById('teamNameInput').value.trim();
     if (!name) {
@@ -84,7 +89,8 @@ function join() {
 
     connectWs();
 }
-
+// }}}
+// handleMessage {{{
 function handleMessage(msg) {
     switch (msg.type) {
         case 'joined':
@@ -108,7 +114,8 @@ function handleMessage(msg) {
             console.log('Unknown message:', msg);
     }
 }
-
+// }}}
+// showQuiz {{{
 function showQuiz() {
     document.getElementById('joinScreen').style.display = 'none';
     document.getElementById('quizScreen').style.display = 'block';
@@ -182,7 +189,8 @@ function showQuiz() {
         container.appendChild(card);
     });
 }
-
+// }}}
+// submitAnswer {{{
 function submitAnswer(questionId, questionType) {
     const btn = document.getElementById('submit-btn-' + questionId);
     btn.disabled = true;
@@ -227,7 +235,8 @@ function submitAnswer(questionId, questionType) {
         btn.textContent = 'Ошибка соединения';
     }
 }
-
+// }}}
+// updateQuestionStatus {{{
 function updateQuestionStatus(questionId, status) {
     const card = document.getElementById('question-' + questionId);
     if (!card) return;
@@ -240,7 +249,8 @@ function updateQuestionStatus(questionId, status) {
         statusDiv.className = 'answer-sent visible';
     }
 }
-
+// }}}
+// handleTimerAction {{{
 function handleTimerAction(action) {
     const overlay = document.getElementById('timerOverlay');
     const title = document.getElementById('overlayTitle');
@@ -258,3 +268,4 @@ function handleTimerAction(action) {
         overlay.style.display = 'flex';
     }
 }
+// }}}

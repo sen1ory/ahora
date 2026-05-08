@@ -1,15 +1,20 @@
 # Модуль: HttpServer — минимальный HTTP-сервер для статики
 # Собирается как статическая библиотека
 
-# Read web client source files and embed them into C++ header
+# Read web client source files and assemble into a single HTML string
 set(WEB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/web)
 file(READ ${WEB_DIR}/style.css WEB_STYLE_CONTENT)
 file(READ ${WEB_DIR}/script.js WEB_SCRIPT_CONTENT)
+file(READ ${WEB_DIR}/index.html WEB_HTML_TEMPLATE)
+
+# Substitute placeholders in index.html with actual CSS/JS content
+string(CONFIGURE "${WEB_HTML_TEMPLATE}" WEB_HTML_CONTENT @ONLY)
 
 # Regenerate when web files change
 set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
     ${WEB_DIR}/style.css
     ${WEB_DIR}/script.js
+    ${WEB_DIR}/index.html
 )
 
 # Generate C++ header with embedded web content
