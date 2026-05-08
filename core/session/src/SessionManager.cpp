@@ -6,6 +6,7 @@
 #include <QUuid>
 
 
+// Loads quiz from file and extracts only the question texts for QML access
 SessionManager::SessionManager(QObject *parent)
     : QAbstractListModel(parent)
 {
@@ -127,6 +128,7 @@ void SessionManager::setScore(const QString &teamId, int questionId, int score) 
     }
 }
 
+// Allows admin to manually grade a text answer and sends the result to the client
 void SessionManager::approveTextAnswer(const QString &teamId, int questionId, bool correct) {
     for (int i = 0; i < m_teams.size(); ++i) {
         if (m_teams[i]->id == teamId) {
@@ -148,6 +150,8 @@ void SessionManager::approveTextAnswer(const QString &teamId, int questionId, bo
     }
 }
 
+// Generates a UUID, allocates a TeamData, and inserts it into the model
+// Notifies QML via teamCountChanged so the admin panel rebuilds its team cards
 QString SessionManager::addTeam(const QString &name, QWebSocket *socket) {
     const QString id = QUuid::createUuid().toString(QUuid::WithoutBraces);
 
@@ -163,8 +167,8 @@ QString SessionManager::addTeam(const QString &name, QWebSocket *socket) {
 
     emit teamCountChanged();
 
-    qInfo().noquote() << "[SessionManager] Команда добавлена:" << name << "id:" << id
-                      << "Всего команд:" << m_teams.size();
+    qInfo().noquote() << "[SessionManager] Team added:" << name << "id:" << id
+                      << "Total teams:" << m_teams.size();
     return id;
 }
 
@@ -179,10 +183,10 @@ void SessionManager::updateAnswer(const QString &teamId, int questionId, const Q
             emit dataChanged(idx, idx, {StatusesRole, AnswersRole});
             emit teamDataChanged(teamId);
 
-            qInfo().noquote() << "[SessionManager] Ответ от" << m_teams[i]->name
-                              << "на вопрос" << questionId
-                              << "статус:" << status
-                              << "ответ:" << m_teams[i]->answers[questionId];
+            qInfo().noquote() << "[SessionManager] Answer from" << m_teams[i]->name
+                              << "on question" << questionId
+                              << "status:" << status
+                              << "answer:" << m_teams[i]->answers[questionId];
             return;
         }
     }
@@ -196,7 +200,7 @@ void SessionManager::removeTeam(const QString &teamId) {
             m_teams.removeAt(i);
             endRemoveRows();
             emit teamCountChanged();
-            qInfo().noquote() << "[SessionManager] Команда удалена, id:" << teamId;
+            qInfo().noquote() << "[SessionManager] Team removed, id:" << teamId;
             return;
         }
     }
@@ -209,6 +213,7 @@ TeamData *SessionManager::findBySocket(QWebSocket *socket) const {
     return nullptr;
 }
 
+// Broadcasts timer state changes (pause/resume/timeout) to all connected WebSocket clients
 void SessionManager::broadcastTimerAction(const QString &action) {
     QJsonObject msg;
     msg["type"] = "timer";

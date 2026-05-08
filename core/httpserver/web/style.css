@@ -1,0 +1,162 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #1d2021;
+    color: #ebdbb2;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px;
+}
+
+h1 { color: #d79921; margin: 40px 0 16px; font-size: 28px; }
+h2 { color: #ebdbb2; margin: 16px 0; font-size: 20px; }
+p  { color: #a89984; margin: 8px 0; font-size: 14px; }
+
+/* Join screen — team name input */
+#joinScreen {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    margin-top: 80px;
+}
+
+/* Quiz screen (hidden by default) */
+#quizScreen {
+    width: 100%;
+    max-width: 500px;
+    display: none;
+}
+
+input, textarea, button {
+    font-family: inherit;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 16px;
+    width: 100%;
+    margin: 8px 0;
+}
+
+input, textarea {
+    background: #3c3836;
+    color: #ebdbb2;
+}
+
+input:focus, textarea:focus {
+    outline: 2px solid #d79921;
+    background: #504945;
+}
+
+button {
+    background: #d79921;
+    color: #1d2021;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover { background: #fabd2f; }
+button:disabled {
+    background: #504945;
+    color: #a89984;
+    cursor: not-allowed;
+}
+
+/* Question card */
+.question-card {
+    background: #282828;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+}
+
+.question-card .question-text {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    color: #ebdbb2;
+}
+
+.question-card .status-dot {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+/* Radio buttons and checkboxes as block elements */
+.option {
+    display: block;
+    background: #3c3836;
+    border-radius: 8px;
+    padding: 10px 14px;
+    margin: 6px 0;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.option:hover { background: #504945; }
+.option.selected { background: #d79921; color: #1d2021; }
+
+.option input {
+    display: none;
+}
+
+/* "Sent" message after answer submission */
+.answer-sent {
+    margin-top: 8px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    background: #504945;
+    color: #a89984;
+    font-size: 13px;
+    display: none;
+}
+
+.answer-sent.visible { display: block; }
+
+/* Block interaction after submission */
+.question-card.sent .option {
+    opacity: 0.6;
+    pointer-events: none;
+}
+.question-card.sent .submit-answer {
+    display: none;
+}
+
+/* Pause/timeout overlay */
+#timerOverlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.85);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+#timerOverlay h1 {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+#timerOverlay p {
+    font-size: 18px;
+    color: #a89984;
+}
+
+/* Submit answer button for each question */
+.submit-answer {
+    background: #458588;
+    color: #ebdbb2;
+    margin-top: 8px;
+}
+
+.submit-answer:hover { background: #83a598; }
+.submit-answer:disabled {
+    background: #504945;
+    color: #a89984;
+}

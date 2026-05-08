@@ -5,8 +5,9 @@ import Ahora_core_ipaddress
 import Ahora_app_main
 
 
-//   1. QR_VIEW
-//   2. ADMIN_PANEL
+// Two views:
+//   1. QR_VIEW — shows QR code and IP selector
+//   2. ADMIN_PANEL — admin panel with team management
 Window {
     id: root
     width: 800
@@ -15,15 +16,15 @@ Window {
     visible: true
     title: "Ahora — Квиз"
 
-    // start with
+    // Start with QR view
     property string currentView: "QR_VIEW"
 
-    // get ip first
+    // Discover IP addresses
     IpAddress {
         id: ipAddress
     }
 
-    // refresh ip every 2 seconds
+    // Refresh IP list every 2 seconds
     Timer {
         interval: 2000
         running: true
@@ -31,14 +32,14 @@ Window {
         onTriggered: ipAddress.refresh()
     }
 
-    // show qr-code
+    // QR code view container
     Rectangle {
         id: qrView
         anchors.fill: parent
         color: AhoraTheme.bgDark
         visible: currentView === "QR_VIEW"
 
-        // Текст-инструкция
+        // Instruction text
         Text {
             id: instructionText
             anchors {
@@ -51,7 +52,7 @@ Window {
             font.pixelSize: 16
         }
 
-        // Показываем выбранный URL
+        // Show the selected URL
         Text {
             id: urlText
             anchors {
@@ -65,7 +66,7 @@ Window {
             font.bold: true
         }
 
-        // QR-код с URL сервера
+        // QR code with server URL
         QRCodeItem {
             id: qrCode
             width: Math.min(root.width, root.height) / 2
@@ -75,14 +76,14 @@ Window {
                 verticalCenterOffset: -20
             }
 
-            // Формируем полный URL: http://IP:8080/
+            // Build full URL: http://IP:8080/
             text: "http://" + ipAddress.ip + ":8080/"
             foreground: AhoraTheme.textPrimary
             background: AhoraTheme.bgDark
         }
 
-        // === Селектор IP: показывает все доступные адреса ===
-        // Нужен для случая, когда IpAddress не угадал сеть хотспота
+        // === IP Selector: show all available addresses ===
+        // Needed when IpAddress auto-selects the wrong hotspot network
         Text {
             id: ipsLabel
             anchors {
@@ -95,7 +96,7 @@ Window {
             font.pixelSize: 12
         }
 
-        // Список IP-адресов — кликабельные кнопки
+        // IP address list — clickable buttons
         Row {
             id: ipList
 
@@ -106,7 +107,7 @@ Window {
             }
             spacing: 8
 
-            // Динамически создаём кнопку на каждый IP
+            // Dynamically create a button for each IP
             Repeater {
                 model: ipAddress.allIps
 
@@ -122,7 +123,7 @@ Window {
 
                     onClicked: {
                         ipAddress.selectIp(modelData)
-                        console.log("Выбран IP:", modelData)
+                        console.log("Selected IP:", modelData)
                     }
                 }
             }
@@ -133,7 +134,7 @@ Window {
 
                 onClicked: {
                     ipAddress.refresh()
-                    console.log("Список IP обновлён")
+                    console.log("IP list refreshed")
                 }
             }
         }
@@ -159,21 +160,21 @@ Window {
 
             onClicked: {
                 currentView = "ADMIN_PANEL"
-                console.log("Переключились на панель администратора")
+                console.log("Switched to admin panel")
             }
         }
     }
 
-    // === Состояние 2: Панель администратора ===
+    // === State 2: Admin panel ===
     AdminPanel {
         id: adminPanel
         anchors.fill: parent
         visible: currentView === "ADMIN_PANEL"
 
-        // При нажатии "Назад" возвращаемся к QR-коду
+        // On "Back", return to QR code view
         onGoBack: {
             currentView = "QR_VIEW"
-            console.log("Вернулись к QR-коду")
+            console.log("Returned to QR code")
         }
     }
 }

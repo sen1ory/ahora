@@ -7,9 +7,9 @@
 #include <QTcpSocket>
 
 
-// HttpServer — минимальный HTTP сервер на порту 8080
-// Отдаёт статическую HTML-страницу (веб-клиент квиза)
-// Никаких роутов, сложной логики — только GET / → страница
+// HttpServer — minimal HTTP server on port 8080
+// Serves a static HTML page (the web quiz client)
+// No routing or complex logic — just GET / → page
 class HttpServer : public QObject {
     Q_OBJECT
 
@@ -21,14 +21,11 @@ private slots:
     void onNewConnection();
 
 private:
-    // Формирование HTTP-ответа {{{
+    // Builds an HTTP response with status line, headers, and body
     QByteArray buildResponse(const QByteArray &contentType,
                              const QByteArray &body,
                              int statusCode = 200) const;
-    // }}}
-
     QTcpServer *m_server;
 };
-
 
 #endif

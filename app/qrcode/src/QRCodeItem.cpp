@@ -44,6 +44,9 @@ void QRCodeItem::setBorder(int border) {
     }
 }
 
+// Generate QR code bitmap using the Nayuki library.
+// Encodes text at LOW error correction (most compact), renders each module as a pixel,
+// adds border padding, and stores the result in m_qrImage.
 void QRCodeItem::generateQRImage() {
     if (m_text.isEmpty()) {
         m_qrImage = QImage();
@@ -73,6 +76,7 @@ void QRCodeItem::generateQRImage() {
     }
 }
 
+// Scales the generated QR image to fit the item dimensions (centered, aspect-ratio preserved)
 void QRCodeItem::paint(QPainter *painter) {
     if (m_qrImage.isNull()) {
         return;

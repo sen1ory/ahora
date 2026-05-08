@@ -21,7 +21,7 @@ class QRCodeItem : public QQuickPaintedItem {
 public:
     QRCodeItem(QQuickItem *parent = nullptr);
 
-    // setters/getters {{{
+    // setters/getters
     QString text() const { return m_text; }
     void setText(const QString &text);
 
@@ -33,29 +33,29 @@ public:
 
     int border() const { return m_border; }
     void setBorder(int border);
-    // }}}
+    // End setters/getters
 
 private:
     void paint(QPainter *painter) override;
 
 signals:
-    // signals {{{
+    // signals
     void textChanged();
     void foregroundChanged();
     void backgroundChanged();
     void borderChanged();
-    // }}}
+    // End signals
 
 private:
     void generateQRImage();
 
-    // qr paremeters {{{
+    // QR code parameters
     QString m_text;
     QColor m_foreground{Qt::black};
     QColor m_background{Qt::white};
-    // TODO: fix border painting
+    // TODO: fix border painting (currently ignored in rendering)
     int m_border{4};
-    // }}}
+    // End QR code parameters
 
     QImage m_qrImage;
 };

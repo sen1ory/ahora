@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Квиз</title>
+<style>
+@WEB_STYLE_CONTENT@
+</style>
+</head>
+<body>
+<!-- Screen 1: Team name input -->
+<div id="joinScreen">
+    <h1>Квиз</h1>
+    <p>Введите название вашей команды</p>
+    <input type="text" id="teamNameInput" placeholder="Название команды" maxlength="40"
+           onkeydown="if(event.key==='Enter') join()">
+    <button id="joinBtn" onclick="join()">Присоединиться</button>
+    <p id="joinError" style="color:#cc241d;display:none;margin-top:12px;"></p>
+</div>
+
+<!-- Screen 2: Quiz questions -->
+<div id="quizScreen">
+    <h2>Команда: <span id="teamNameDisplay"></span></h2>
+    <div id="questionsContainer"></div>
+</div>
+
+<!-- Pause / timeout overlay -->
+<div id="timerOverlay">
+    <h1 id="overlayTitle">Пауза</h1>
+    <p id="overlaySubtext">Приостановлено администратором, пожалуйста, дождитесь подолжения</p>
+</div>
+
+<!-- Reconnection banner -->
+<div id="reconnectBanner" style="display:none;position:fixed;top:0;left:0;right:0;background:#b71c1c;color:#fff;padding:12px;text-align:center;font-size:14px;z-index:10000;"></div>
+
+<script>
+@WEB_SCRIPT_CONTENT@
+</script>
+</body>
+</html>

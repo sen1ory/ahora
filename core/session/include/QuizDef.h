@@ -9,15 +9,21 @@
 #include <QSet>
 
 
-// Структура одного вопроса квиза
+// Structure for a single quiz question
 struct QuestionDef {
-    int id;              // 0, 1, 2
+    int id;              // 0, 1, 2, ...
     QString type;        // "single", "multiple", "text"
-    QString text;        // Текст вопроса
-    QStringList options; // Варианты ответов (пусто для text)
-    QStringList correct; // Правильные ответы (пусто для text, проверяется вручную)
+    QString text;        // Question text
+    QStringList options; // Answer options (empty for text type)
+    QStringList correct; // Correct answers (empty for text type, manually reviewed)
 };
 
+// Status color meanings:
+//   "white"  — unanswered
+//   "green"  — correct
+//   "red"    — incorrect
+//   "orange" — pending manual review (text answers only)
+// Text answers always return "orange" because they cannot be auto-graded
 inline QString checkQuizAnswer(const QVector<QuestionDef> &quiz, int questionId, const QStringList &answers) {
     if (questionId < 0 || questionId >= quiz.size())
         return "white";
@@ -38,11 +44,11 @@ inline QString checkQuizAnswer(const QVector<QuestionDef> &quiz, int questionId,
     }
 }
 
-// Жёстко заданные 3 вопроса квиза
+// Hardcoded default 3 quiz questions (used as fallback)
 inline const QVector<QuestionDef> s_quizQuestions = {
-    {0, "single",   "Какая планета самая большая?",           {"Марс", "Юпитер", "Венера"},                      {"Юпитер"}},
-    {1, "multiple", "Какие из этих языков компилируемые?",    {"Python", "C++", "JavaScript", "Rust"},            {"C++", "Rust"}},
-    {2, "text",     "Напишите название столицы Франции",      {},                                                 {}}
+    {0, "single",   "Какая планета самая большая?",            {"Марс", "Юпитер", "Венера"},                          {"Юпитер"}},
+    {1, "multiple", "Какие из этих языков компилируемые?",   {"Python", "C++", "JavaScript", "Rust"},                {"C++", "Rust"}},
+    {2, "text",     "Напишите название столицы Франции",  {},                                                     {}}
 };
 
 

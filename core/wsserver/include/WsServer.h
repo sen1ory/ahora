@@ -11,9 +11,9 @@
 
 class SessionManager;
 
-// WsServer — WebSocket сервер на порту 8081
-// Принимает подключения от браузеров, обрабатывает JSON-сообщения
-// и передаёт данные в SessionManager
+// WsServer — WebSocket server on port 8081
+// Accepts browser connections, processes JSON messages,
+// and passes data to SessionManager
 class WsServer : public QObject {
     Q_OBJECT
 
@@ -27,18 +27,18 @@ private slots:
     void onDisconnected();
 
 private:
-    // Обработка входящих JSON сообщений {{{
+    // Handle incoming JSON messages
     void handleJoin(QWebSocket *socket, const QJsonObject &msg);
     void handleAnswer(QWebSocket *socket, const QJsonObject &msg);
-    // }}}
+    // End handle methods
 
-    // Проверка ответа и возврат статуса {{{
+    // Check answer and return status
     QString checkAnswer(int questionId, const QStringList &answers) const;
-    // }}}
+    // End checkAnswer
 
-    SessionManager *m_sessionManager;                 // ссылка на модель команд
-    QWebSocketServer *m_server;                       // сам WebSocket-сервер
-    QHash<QWebSocket*, QString> m_socketToTeamId;     // сокет → UUID команды
+    SessionManager *m_sessionManager;                 // Reference to the team model
+    QWebSocketServer *m_server;                       // WebSocket server instance
+    QHash<QWebSocket*, QString> m_socketToTeamId;     // Socket → team UUID mapping
 };
 
 

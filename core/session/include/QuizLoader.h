@@ -11,6 +11,8 @@
 #include <QDir>
 
 
+// Searches for quiz.json in the app directory and current working directory.
+// Falls back to hardcoded defaults (s_quizQuestions) if no valid file is found.
 inline QVector<QuestionDef> loadQuizFromFile() {
     QStringList searchPaths = {
         QCoreApplication::applicationDirPath() + "/quiz.json",

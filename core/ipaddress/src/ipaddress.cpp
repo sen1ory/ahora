@@ -8,16 +8,16 @@ IpAddress::IpAddress(QObject *parent)
     discoverIps();
 }
 
-// Обновить список адресов. Автоматически выбирает лучший:
-// 1) Предпочитает адреса не на WiFi-интерфейсах (хотспот, usb, ethernet)
-// 2) Если таких нет — берёт первый не-loopback IPv4
+// Refresh IP list. Automatically selects the best one:
+// 1) Prefers non-WiFi interfaces (hotspot, USB tethering, ethernet)
+// 2) Falls back to the first non-loopback IPv4
 void IpAddress::refresh() {
     discoverIps();
     emit ipsChanged();
     emit ipChanged();
 }
 
-// Принудительно выбрать IP из списка
+// Force-select an IP from the list
 void IpAddress::selectIp(const QString &ip) {
     if (m_allIps.contains(ip) && m_ip != ip) {
         m_ip = ip;
@@ -25,16 +25,16 @@ void IpAddress::selectIp(const QString &ip) {
     }
 }
 
-// Заполняем m_allIps и выбираем лучший m_ip
+// Fill m_allIps and select the best m_ip
 void IpAddress::discoverIps() {
     QStringList newIps;
     QString bestIp;
 
-    // Собираем все интерфейсы с их именами
+    // Collect all interfaces with their names
     const QList<QNetworkInterface> ifaces = QNetworkInterface::allInterfaces();
 
     for (const QNetworkInterface &iface : ifaces) {
-        // Пропускаем неактивные и loopback
+        // Skip inactive and loopback interfaces
         if (!(iface.flags() & QNetworkInterface::IsUp))
             continue;
         if (iface.flags() & QNetworkInterface::IsLoopBack)
@@ -51,20 +51,20 @@ void IpAddress::discoverIps() {
 
             QString ifaceName = iface.humanReadableName().toLower();
 
-            // Приоритет: хотспот/usb/eth/p2p интерфейсы выше чем wifi
-            // "usb" — usb-терринг (телефон), "eth" — ethernet, "p2p" — WiFi Direct
-            // Если у текущего bestIp нет такого приоритета — заменяем
+            // Priority: hotspot/USB/ethernet/p2p interfaces rank higher than WiFi
+            // "usb" — USB tethering (phone), "eth" — ethernet, "p2p" — WiFi Direct
+            // If the current bestIp lacks this priority, replace it
             if (bestIp.isEmpty()) {
                 bestIp = ipStr;
             } else {
                 bool currentIsWifi = false;
                 bool candidateIsWifi = false;
 
-                // Определяем тип интерфейса для best и для кандидата
-                // Wifi интерфейсы обычно содержат "wlan" или "wi-fi" в имени
-                QString bestIfaceName = ifaceName; // упрощённо: сравниваем с текущим именем
+                // Determine interface type for best and candidate
+                // WiFi interfaces usually contain "wlan" or "wi-fi" in the name
+                QString bestIfaceName = ifaceName; // simplified: compare with current name
 
-                // Ищем интерфейс для текущего bestIp
+                // Find the interface for the current bestIp
                 QString bestIfaceType = "wifi"; // по умолчанию считаем wifi
                 for (const QNetworkInterface &bi : ifaces) {
                     const QList<QNetworkAddressEntry> be = bi.addressEntries();
@@ -81,7 +81,7 @@ void IpAddress::discoverIps() {
                     }
                 }
 
-                // Определяем тип кандидата
+                // Determine candidate type
                 QString candidateType = "wifi";
                 if (ifaceName.contains("usb") || ifaceName.contains("eth") ||
                     ifaceName.contains("p2p") || ifaceName.contains("enp") ||
@@ -89,7 +89,7 @@ void IpAddress::discoverIps() {
                     candidateType = "preferred";
                 }
 
-                // Если кандидат preferred, а текущий best — wifi, меняем
+                // If candidate is preferred and current best is WiFi, swap
                 if (candidateType == "preferred" && bestIfaceType == "wifi") {
                     bestIp = ipStr;
                 }

@@ -15,25 +15,25 @@
 class QWebSocket;
 
 
-// Структура одной команды в модели
+// Structure for a single team in the model
 struct TeamData {
-    QString id;              // UUID команды
-    QString name;            // Имя команды
-    QStringList statuses;    // Статусы ответов (3 шт): "white","green","red","orange"
-    QStringList answers;     // Тексты ответов на каждый вопрос
-    int score = 0;           // Баллы команды
-    QWebSocket *socket;      // Сокет для отправки сообщений клиенту
+    QString id;              // Team UUID
+    QString name;            // Team name
+    QStringList statuses;    // Answer statuses: "white", "green", "red", "orange"
+    QStringList answers;     // Answer text for each question
+    int score = 0;           // Team score
+    QWebSocket *socket;      // Client socket for sending messages
 };
 
-// SessionManager — модель для QML, хранит список подключенных команд
-// Каждая строка = одна команда. Роли: name, statuses, teamId
+// SessionManager — model for QML, stores all connected teams
+// Each row = one team. Roles: name, statuses, teamId
 class SessionManager : public QAbstractListModel {
     Q_OBJECT
     Q_PROPERTY(int teamCount READ teamCount NOTIFY teamCountChanged)
     Q_PROPERTY(QStringList questions READ questions CONSTANT)
 
 public:
-    // Роли модели для QML делегатов {{{
+    // Model roles for QML delegates
     enum Roles {
         NameRole = Qt::UserRole + 1,
         StatusesRole,
@@ -41,59 +41,59 @@ public:
         AnswersRole,
         ScoreRole
     };
-    // }}}
+    // End roles
 
     explicit SessionManager(QObject *parent = nullptr);
 
-    // QAbstractListModel надстройка {{{
+    // QAbstractListModel overrides
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     QHash<int, QByteArray> roleNames() const override;
-    // }}}
+    // End QAbstractListModel overrides
 
-    // QML-доступные свойства {{{
+    // QML-accessible properties
     int teamCount() const { return m_teams.size(); }
     QStringList questions() const { return m_questions; }
-    // }}}
+    // End QML properties
 
     const QVector<QuestionDef> &quizQuestions() const { return m_quizQuestions; }
 
-    // Доступ к данным команды по строке {{{
+    // Team data access by row index
     Q_INVOKABLE QString teamName(int row) const;
     Q_INVOKABLE QStringList teamStatuses(int row) const;
     Q_INVOKABLE QString teamId(int row) const;
     Q_INVOKABLE QStringList teamAnswers(int row) const;
     Q_INVOKABLE QVariantMap getTeamDataMap(const QString &teamId) const;
-    // }}}
+    // End row-based access
 
-    // Доступ к данным команды по UUID {{{
+    // Team data access by UUID
     Q_INVOKABLE QStringList teamAnswersById(const QString &teamId) const;
     Q_INVOKABLE QStringList teamStatusesById(const QString &teamId) const;
     Q_INVOKABLE QString teamNameById(const QString &teamId) const;
     Q_INVOKABLE int teamScoreById(const QString &teamId) const;
-    // }}}
+    // End UUID-based access
 
-    // Установка баллов за вопрос {{{
+    // Set score for a team
     Q_INVOKABLE void setScore(const QString &teamId, int questionId, int score);
-    // }}}
+    // End setScore
 
-    // Ручное подтверждение текстового ответа админом {{{
+    // Admin manual approval of text answer
     Q_INVOKABLE void approveTextAnswer(const QString &teamId, int questionId, bool correct);
-    // }}}
+    // End approveTextAnswer
 
-    // Методы, вызываемые из WsServer {{{
+    // Methods called from WsServer
     QString addTeam(const QString &name, QWebSocket *socket);   // возвращает UUID
     void updateAnswer(const QString &teamId, int questionId, const QString &status, const QStringList &answers = {});
     void removeTeam(const QString &teamId);
-    // }}}
+    // End WsServer methods
 
-    // Поиск команды по сокету {{{
+    // Find team by socket
     TeamData *findBySocket(QWebSocket *socket) const;
-    // }}}
+    // End findBySocket
 
-    // Рассылка timer-сообщений всем подключенным клиентам {{{
+    // Broadcast timer action to all connected clients
     Q_INVOKABLE void broadcastTimerAction(const QString &action);
-    // }}}
+    // End broadcastTimerAction
 
 signals:
     void teamCountChanged();
@@ -101,7 +101,7 @@ signals:
 
 private:
     QList<TeamData *> m_teams;
-    QStringList m_questions;   // Тексты вопросов для QML
+    QStringList m_questions;   // Question texts for QML access
     QVector<QuestionDef> m_quizQuestions;
 };
 

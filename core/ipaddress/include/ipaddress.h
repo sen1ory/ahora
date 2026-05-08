@@ -11,38 +11,38 @@
 class IpAddress : public QObject {
     Q_OBJECT
     QML_ELEMENT
-    // Текущий выбранный IP для QR-кода
+    // Currently selected IP for QR code
     Q_PROPERTY(QString ip READ ip NOTIFY ipChanged)
-    // Список ВСЕХ IPv4 адресов (кроме localhost) для выбора
+    // List of ALL IPv4 addresses (excluding localhost) for manual selection
     Q_PROPERTY(QStringList allIps READ allIps NOTIFY ipsChanged)
 
 public:
     IpAddress(QObject *parent = nullptr);
 
-    // геттеры {{{
+    // Getters
     QString ip() const { return m_ip; }
     QStringList allIps() const { return m_allIps; }
-    // }}}
+    // End getters
 
-    // Обновить список IP и попытаться выбрать лучший
+    // Refresh IP list and attempt to pick the best one
     Q_INVOKABLE void refresh();
-    // Принудительно выбрать IP из списка
+    // Manually select an IP from the list
     Q_INVOKABLE void selectIp(const QString &ip);
 
 signals:
-    // сигналы {{{
+    // Signals
     void ipChanged();
     void ipsChanged();
-    // }}}
+    // End signals
 
 private:
-    // Заполнить m_allIps и выбрать лучший
+    // Fill m_allIps and select the best one
     void discoverIps();
 
-    // IP параметры {{{
+    // IP parameters
     QString m_ip;
     QStringList m_allIps;
-    // }}}
+    // End IP parameters
 };
 
 

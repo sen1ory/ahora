@@ -3,7 +3,7 @@ import QtQuick.Controls
 import Ahora_app_main
 
 
-// TeamCard — карточка одной команды на панели администратора
+// TeamCard — a single team card on the admin panel
 Rectangle {
     id: card
 
@@ -35,7 +35,7 @@ Rectangle {
         }
         spacing: 6
 
-        // Имя команды
+        // Team name
         Text {
             text: card.teamName
             color: "#ebdbb2"
@@ -45,16 +45,16 @@ Rectangle {
             width: parent.width
         }
 
-        // Разделитель
+        // Divider
         Rectangle {
             width: parent.width
             height: 1
             color: "#3c3836"
         }
 
-        // Список вопросов с цветовыми индикаторами
+        // Questions list with color-coded status indicators
         Repeater {
-            model: card.teamStatuses.length
+            model: card.teamStatuses ? card.teamStatuses.length : 0
 
             delegate: Item {
                 width: parent.width
@@ -64,7 +64,7 @@ Rectangle {
                 property string status: card.teamStatuses[index] || "white"
                 property string answer: (card.teamAnswers && index < card.teamAnswers.length) ? card.teamAnswers[index] : ""
 
-                // Цветовой кружок
+                // Color-coded status dot
                 Rectangle {
                     id: statusDot
                     width: 12
@@ -80,7 +80,7 @@ Rectangle {
                     }
                 }
 
-                // Текст вопроса
+                // Question text
                 Text {
                     anchors {
                         left: statusDot.right

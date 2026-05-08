@@ -4,20 +4,24 @@ import QtQuick.Layouts
 import Ahora_app_main
 
 
-// AdminPanel — панель администратора со списком подключенных команд
+// AdminPanel — admin panel with list of connected teams
 Rectangle {
     id: panelRoot
 
     signal goBack()
 
-    // Отладка
+    // Debug
     Component.onCompleted: {
-        console.log("AdminPanel создан, teamCount:", SM ? SM.teamCount : "null")
+        console.log("AdminPanel created, teamCount:", SM ? SM.teamCount : "null")
+        rebuildTeamCards()
     }
 
     color: AhoraTheme.bgDark
 
-    // === Таймер ===
+    // === Timer state machine:
+    //   stopped (default) → startTimer() → running → pauseTimer() → paused → startTimer() → running
+    //   Any state → resetTimer() → stopped
+    //   running + countdown reaches 0 → expired (broadcasts "timeout") ===
     property int timerMinutes: 5
     property int timerSeconds: 0
     property int remainingSeconds: timerMinutes * 60 + timerSeconds
@@ -75,7 +79,7 @@ Rectangle {
         SM.broadcastTimerAction("reset")
     }
 
-    // Верхняя панель с заголовком, счётчиком и кнопкой "Назад"
+    // === Header bar with title, team counter, back button, and timer ===
     Rectangle {
         id: headerBar
         anchors {
@@ -107,7 +111,7 @@ Rectangle {
             font.bold: true
             font.pixelSize: 16
         }
-        // Счётчик команд
+        // Team counter
         Text {
             anchors {
                 right: parent.right
@@ -118,8 +122,8 @@ Rectangle {
             color: "#a89984"
             font.pixelSize: 13
         }
-        // Таймер
-        GruvButton {
+    // Timer display and control button (left-click toggles, right-click for settings)
+    GruvButton {
             id: timerButton
             anchors {
                 right: parent.right
@@ -140,7 +144,7 @@ Rectangle {
                 return "blue"
             }
 
-            // left click: start/pause
+            // Left click: start/pause toggle
             onClicked: {
                 if (panelRoot.timerExpired) return
                 if (panelRoot.timerRunning) { panelRoot.pauseTimer() }
@@ -148,13 +152,13 @@ Rectangle {
                 else { panelRoot.startTimer() }
             }
 
-            // right click: context menu
+            // Right click: context menu for timer settings
             TapHandler {
                 acceptedButtons: Qt.RightButton
                 onTapped: timerMenu.popup()
             }
 
-            // the settings menu (unchanged from original, but now inside the button)
+            // Timer settings context menu
             Menu {
                 id: timerMenu
 
@@ -191,7 +195,7 @@ Rectangle {
                             background: Rectangle { color: AhoraTheme.bgBorder; radius: 4 }
                         }
 
-                        Text { text: "сек"; color: Ahora; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
+                        Text { text: "сек"; color: AhoraTheme.textSecondary; font.pixelSize: 13; anchors.verticalCenter: parent.verticalCenter }
                     }
                     background: Rectangle { color: AhoraTheme.bgMedium; radius: 6; border.color: AhoraTheme.bgBorderLight; border.width: 1 }
                     implicitWidth: 260; implicitHeight: 40
@@ -223,7 +227,36 @@ Rectangle {
         }
     }
 
-    // === Область карточек команд — центрирована по центру по вертикали и горизонтали ===
+    // TeamCard component template for dynamic creation
+    Component {
+        id: teamCardComponent
+        TeamCard {
+            NumberAnimation on opacity {
+                from: 0; to: 1; duration: 400; easing.type: Easing.OutCubic
+            }
+        }
+    }
+
+// Dynamically creates TeamCard instances from SM model data.
+// Called whenever teamCountChanged or teamDataChanged fires.
+function rebuildTeamCards() {
+    var children = flow.children;
+    for (var i = children.length - 1; i >= 0; i--) {
+        if (children[i].objectName === "placeholder") continue;
+        children[i].destroy();
+    }
+    for (var j = 0; j < SM.teamCount; j++) {
+        var card = teamCardComponent.createObject(flow, {
+            teamName: SM.teamName(j),
+            teamStatuses: SM.teamStatuses(j),
+            teamId: SM.teamId(j),
+            teamAnswers: SM.teamAnswers(j)
+        });
+        card.clicked.connect(function(id) { panelRoot.openTeamDetail(id); });
+    }
+}
+
+// === Team cards area — centered vertically and horizontally ===
     ScrollView {
         id: scrollArea
         anchors {
@@ -248,8 +281,9 @@ Rectangle {
                 Layout.preferredWidth: scrollArea.availableWidth
                 spacing: 12
 
-                // Плейсхолдер, если команд нет
+                // Placeholder shown when no teams are connected
                 Rectangle {
+                    objectName: "placeholder"
                     visible: SM.teamCount === 0
                     width: parent.width; height: 60; color: "transparent"
                     Text {
@@ -258,38 +292,30 @@ Rectangle {
                         color: AhoraTheme.textSecondary; font.pixelSize: 15
                     }
                 }
-
-                Repeater {
-                    model: SM
-
-                    delegate: TeamCard {
-                        teamName: name
-                        teamStatuses: statuses
-                        teamId: teamId
-                        teamAnswers: answers
-
-                        onClicked: function(id) {
-                            panelRoot.openTeamDetail(id)
-                        }
-
-                        NumberAnimation on opacity {
-                            from: 0; to: 1; duration: 400; easing.type: Easing.OutCubic
-                        }
-                    }
-                }
             }
 
             Item { Layout.fillHeight: true }
         }
     }
 
-    // === Детальный попап команды ===
+    Connections {
+        target: SM
+        function onTeamCountChanged() {
+            rebuildTeamCards();
+        }
+        function onTeamDataChanged(teamId) {
+            rebuildTeamCards();
+        }
+    }
+
+    // === Team detail popup: full-screen overlay showing answers and grading controls ===
     property string detailTeamId: ""
     property bool detailVisible: false
 
     function openTeamDetail(teamId) {
         panelRoot.detailTeamId = teamId
         panelRoot.detailVisible = true
+        detailPopup.refreshTeamData()
     }
 
     function closeTeamDetail() {
@@ -299,6 +325,26 @@ Rectangle {
 
     Rectangle {
         id: detailPopup
+
+        // Reactive data map — updates automatically when teamDataChanged fires
+        property var teamDataMap: ({})
+
+        function refreshTeamData() {
+            if (panelRoot.detailVisible && panelRoot.detailTeamId !== "") {
+                teamDataMap = SM.getTeamDataMap(panelRoot.detailTeamId);
+            }
+        }
+
+    // React to model changes: rebuild cards when teams join/leave or data updates
+    Connections {
+            target: SM
+            function onTeamDataChanged(teamId) {
+                if (teamId === panelRoot.detailTeamId) {
+                    detailPopup.refreshTeamData();
+                }
+            }
+        }
+
         anchors.fill: parent
         color: "#dd000000"
         visible: panelRoot.detailVisible
@@ -330,7 +376,7 @@ Rectangle {
                 spacing: 6
 
                 Text {
-                    text: SM.teamNameById(panelRoot.detailTeamId) || "Команда"
+                    text: detailPopup.teamDataMap.name || "Команда" 
                     color: "#ebdbb2"; font.bold: true; font.pixelSize: 20
                 }
 
@@ -376,35 +422,36 @@ Rectangle {
                                     // Team answer
                                     Text {
                                         text: {
-                                            var answers = SM.teamAnswersById(panelRoot.detailTeamId)
-                                            if (answers.length > index && answers[index] !== "")
-                                                return "Ответ: " + answers[index]
+                                            var td = detailPopup.teamDataMap
+                                            if (td.answers && index < td.answers.length && td.answers[index] !== "")
+                                                return "Ответ: " + td.answers[index]
                                             return "Нет ответа"
                                         }
-                                        color: "#a89984"; font.pixelSize: 12
-                                        wrapMode: Text.WordWrap; width: parent.width
                                     }
 
                                     // Status
                                     Text {
                                         text: {
-                                            var statuses = SM.teamStatusesById(panelRoot.detailTeamId)
-                                            if (statuses.length <= index) return ""
-                                            if (statuses[index] === "white") return "⏺ Не отвечен"
-                                            if (statuses[index] === "green") return "✅ Верно"
-                                            if (statuses[index] === "red") return "❌ Неверно"
-                                            if (statuses[index] === "orange") return "⏳ Ожидает проверки"
+                                            var td = detailPopup.teamDataMap
+                                            if (td.statuses && index < td.statuses.length) {
+                                                var s = td.statuses[index];
+                                                if (s === "white") return "⏺ Не отвечен"
+                                                if (s === "green") return "✅ Верно"
+                                                if (s === "red") return "❌ Неверно"
+                                                if (s === "orange") return "⏳ Ожидает проверки"
+                                            }
                                             return ""
                                         }
                                         color: {
                                             var statuses = SM.teamStatusesById(panelRoot.detailTeamId)
                                             if (statuses.length <= index) return "#665c54"
-                                            if (statuses[index] === "green") return "#00CC66"
-                                            if (statuses[index] === "red") return "#FF4444"
-                                            if (statuses[index] === "orange") return "#FF8800"
+                                            if (statuses[index] === "green") return "#98971a"
+                                            if (statuses[index] === "red") return "#cc241d"
+                                            if (statuses[index] === "orange") return "#d65d0e"
                                             return "#665c54"
                                         }
                                         font.pixelSize: 12
+                                        visible: index === 2 && (detailPopup.teamDataMap.statuses ? detailPopup.teamDataMap.statuses[index] === "orange" : false)
                                     }
 
                                     // Approve/reject buttons for text question (index 2)
@@ -456,7 +503,7 @@ Rectangle {
                     SpinBox {
                         id: scoreSpin
                         from: 0; to: 100
-                        value: 0
+                        value: detailPopup.teamDataMap.score || 0
                         width: 80; height: 30
                         contentItem: Text {
                             text: scoreSpin.value
@@ -474,7 +521,8 @@ Rectangle {
                         colorVariant: "yellow"
                         onClicked: {
                             SM.setScore(panelRoot.detailTeamId, 0, scoreSpin.value)
-                            console.log("Сохранено", scoreSpin.value, "баллов для", panelRoot.detailTeamId)
+                            console.log("Saved", scoreSpin.value, "points for", panelRoot.detailTeamId)
+                            detailPopup.refreshTeamData()
                         }
                     }
                 }

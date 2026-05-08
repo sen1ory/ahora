@@ -13,15 +13,15 @@ WsServer::WsServer(SessionManager *sessionManager, quint16 port, QObject *parent
     , m_server(new QWebSocketServer("Ahora WsServer",
                                     QWebSocketServer::NonSecureMode, this))
 {
-    // Запускаем WebSocket-сервер на указанном порту
+    // Start WebSocket server on the specified port
     if (m_server->listen(QHostAddress::Any, port)) {
         qInfo().noquote()
-            << "[WsServer] Запущен на порту" << port;
+            << "[WsServer] Started on port" << port;
         connect(m_server, &QWebSocketServer::newConnection,
                 this, &WsServer::onNewConnection);
     } else {
         qWarning().noquote()
-            << "[WsServer] Не удалось запустить на порту" << port;
+            << "[WsServer] Failed to start on port" << port;
     }
 }
 
@@ -29,22 +29,22 @@ WsServer::~WsServer() {
     if (m_server) m_server->close();
 }
 
-// Новое WebSocket-подключение
+// New WebSocket connection
 void WsServer::onNewConnection() {
     QWebSocket *socket = m_server->nextPendingConnection();
     if (!socket) return;
 
     qInfo().noquote()
-        << "[WsServer] Новое подключение:" << socket->peerAddress().toString();
+        << "[WsServer] New connection:" << socket->peerAddress().toString();
 
-    // Подключаем сигналы
+    // Connect signals
     connect(socket, &QWebSocket::textMessageReceived,
             this, &WsServer::onTextMessageReceived);
     connect(socket, &QWebSocket::disconnected,
             this, &WsServer::onDisconnected);
 }
 
-// Получено текстовое сообщение от клиента
+// Text message received from client
 void WsServer::onTextMessageReceived(const QString &message) {
     QWebSocket *socket = qobject_cast<QWebSocket *>(sender());
     if (!socket) return;
@@ -62,51 +62,53 @@ void WsServer::onTextMessageReceived(const QString &message) {
     }
 }
 
-// Клиент отключился
+// Client disconnected
 void WsServer::onDisconnected() {
     QWebSocket *socket = qobject_cast<QWebSocket *>(sender());
     if (!socket) return;
 
-    // Находим команду по сокету и удаляем из модели
+    // Find team by socket and remove from model
     QString teamId = m_socketToTeamId.value(socket);
     if (!teamId.isEmpty()) {
         m_sessionManager->removeTeam(teamId);
         m_socketToTeamId.remove(socket);
         qInfo().noquote()
-            << "[WsServer] Команда отключилась, id:" << teamId;
+            << "[WsServer] Team disconnected, id:" << teamId;
     }
 
     socket->deleteLater();
 }
 
-// Обработка join: регистрируем команду и отправляем вопросы
+// Handle join: register team and send quiz questions
 void WsServer::handleJoin(QWebSocket *socket, const QJsonObject &msg) {
     QString name = msg.value("name").toString().trimmed();
     if (name.isEmpty()) {
         QJsonObject err;
         err["type"] = "error";
-        err["message"] = "Имя команды не может быть пустым";
+        err["message"] = "Team name cannot be empty";
         socket->sendTextMessage(
             QJsonDocument(err).toJson(QJsonDocument::Compact));
         return;
     }
 
-    // Регистрируем команду в SessionManager
+    // Register team in SessionManager
     QString teamId = m_sessionManager->addTeam(name, socket);
     m_socketToTeamId[socket] = teamId;
 
     qInfo().noquote()
-        << "[WsServer] Команда '" << name << "' присоединилась, id:"
+        << "[WsServer] Team '" << name << "' joined, id:"
         << teamId;
 
-    // Отправляем подтверждение регистрации
+    // Send join confirmation
     QJsonObject joined;
     joined["type"] = "joined";
     joined["id"] = teamId;
     socket->sendTextMessage(
         QJsonDocument(joined).toJson(QJsonDocument::Compact));
 
-    // Отправляем вопросы квиза (без правильных ответов!)
+    // Send quiz questions (without correct answers!)
+    // We intentionally omit the `correct` field to prevent client-side cheating.
+    // Text questions are graded manually by the admin. 
     QJsonObject quizMsg;
     quizMsg["type"] = "quiz";
     QJsonArray questions;
@@ -128,33 +130,33 @@ void WsServer::handleJoin(QWebSocket *socket, const QJsonObject &msg) {
         QJsonDocument(quizMsg).toJson(QJsonDocument::Compact));
 }
 
-// Обработка answer: проверяем ответ и обновляем статус
+// Handle answer: validate and update status
 void WsServer::handleAnswer(QWebSocket *socket, const QJsonObject &msg) {
-    // Находим команду по сокету
+    // Find team by socket
     QString teamId = m_socketToTeamId.value(socket);
     if (teamId.isEmpty()) return;
 
     int questionId = msg.value("questionId").toInt(-1);
     if (questionId < 0 || questionId >= m_sessionManager->quizQuestions().size()) return;
 
-    // Собираем ответы из JSON массива
+    // Collect answers from JSON array
     QJsonArray answersArr = msg.value("answers").toArray();
     QStringList answers;
     for (const auto &a : answersArr) {
         answers.append(a.toString());
     }
 
-    qInfo().noquote() << "[WsServer] Получен ответ от команды" << teamId
-                      << "на вопрос" << questionId
-                      << "ответы:" << answers;
+    qInfo().noquote() << "[WsServer] Answer received from team" << teamId
+                      << "on question" << questionId
+                      << "answers:" << answers;
 
-    // Проверяем ответ и получаем статус
+    // Validate answer and get status
     QString status = checkAnswer(questionId, answers);
 
-    // Обновляем статус и ответы в модели
+    // Update status and answers in the model
     m_sessionManager->updateAnswer(teamId, questionId, status, answers);
 
-    // Отправляем результат клиенту
+    // Send result back to client
     QJsonObject result;
     result["type"] = "result";
     result["questionId"] = questionId;
@@ -163,7 +165,7 @@ void WsServer::handleAnswer(QWebSocket *socket, const QJsonObject &msg) {
         QJsonDocument(result).toJson(QJsonDocument::Compact));
 }
 
-// Проверка ответа: возвращает "green", "red" или "orange"
+// Check answer: returns "green", "red", or "orange"
 QString WsServer::checkAnswer(int questionId, const QStringList &answers) const {
     return checkQuizAnswer(m_sessionManager->quizQuestions(), questionId, answers);
 }
