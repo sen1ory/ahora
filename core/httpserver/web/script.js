@@ -128,6 +128,9 @@ function showQuiz() {
         const card = document.createElement('div');
         card.className = 'question-card';
         card.id = 'question-' + q.id;
+        if (q.text.indexOf('$$') !== -1) {
+            card.classList.add('has-math');
+        }
 
         const text = document.createElement('div');
         text.className = 'question-text';
@@ -188,6 +191,16 @@ function showQuiz() {
 
         container.appendChild(card);
     });
+
+    // Render LaTeX math in questions
+    if (typeof renderMathInElement === 'function') {
+        try {
+            renderMathInElement(container, {
+                delimiters: [{left: '$$', right: '$$', display: true}],
+                throwOnError: false
+            });
+        } catch(e) { console.warn('Math render error:', e); }
+    }
 }
 // }}}
 // submitAnswer {{{

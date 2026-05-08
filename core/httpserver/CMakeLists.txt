@@ -1,39 +1,37 @@
 # Модуль: HttpServer — минимальный HTTP-сервер для статики
 # Собирается как статическая библиотека
 
-# Read web client source files and assemble into a single HTML string
 set(WEB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/web)
-file(READ ${WEB_DIR}/style.css WEB_STYLE_CONTENT)
-file(READ ${WEB_DIR}/script.js WEB_SCRIPT_CONTENT)
-file(READ ${WEB_DIR}/index.html WEB_HTML_TEMPLATE)
+set(GENERATED_DIR ${CMAKE_CURRENT_BINARY_DIR}/generated)
+set(GENERATED_HEADER ${GENERATED_DIR}/web_content.h)
 
-# Substitute placeholders in index.html with actual CSS/JS content
-string(CONFIGURE "${WEB_HTML_TEMPLATE}" WEB_HTML_CONTENT @ONLY)
-
-# Regenerate when web files change
-set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS
-    ${WEB_DIR}/style.css
-    ${WEB_DIR}/script.js
-    ${WEB_DIR}/index.html
-)
-
-# Generate C++ header with embedded web content
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/web_content.h.in
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/web_content.h
-    @ONLY
+# Build-time generation: runs every time web files change
+add_custom_command(
+    OUTPUT ${GENERATED_HEADER}
+    DEPENDS
+        ${WEB_DIR}/style.css
+        ${WEB_DIR}/script.js
+        ${WEB_DIR}/index.html
+        ${CMAKE_CURRENT_SOURCE_DIR}/src/generate_web_content.cmake
+    COMMAND ${CMAKE_COMMAND}
+        -D WEB_DIR=${WEB_DIR}
+        -D OUTPUT_HEADER=${GENERATED_HEADER}
+        -P ${CMAKE_CURRENT_SOURCE_DIR}/src/generate_web_content.cmake
+    COMMENT "Generating web_content.h from web client files"
 )
 
 add_library(ahora_core_httpserver STATIC
     include/HttpServer.h
     src/HttpServer.cpp
+    ${GENERATED_HEADER}
+)
+
+target_include_directories(ahora_core_httpserver PUBLIC
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+    ${GENERATED_DIR}
 )
 
 target_link_libraries(ahora_core_httpserver PUBLIC
     Qt6::Core
     Qt6::Network
-)
-
-target_include_directories(ahora_core_httpserver PUBLIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/include
 )

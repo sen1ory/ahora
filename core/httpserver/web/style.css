@@ -1,3 +1,4 @@
+/* general styling {{{ */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -13,21 +14,6 @@ body {
 h1 { color: #d79921; margin: 40px 0 16px; font-size: 28px; }
 h2 { color: #ebdbb2; margin: 16px 0; font-size: 20px; }
 p  { color: #a89984; margin: 8px 0; font-size: 14px; }
-
-/* Join screen — team name input */
-#joinScreen {
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    margin-top: 80px;
-}
-
-/* Quiz screen (hidden by default) */
-#quizScreen {
-    width: 100%;
-    max-width: 500px;
-    display: none;
-}
 
 input, textarea, button {
     font-family: inherit;
@@ -57,12 +43,37 @@ button {
     transition: background 0.2s;
 }
 
-button:hover { background: #fabd2f; }
+button:hover {
+    background: #fabd2f;
+}
+
 button:disabled {
     background: #504945;
     color: #a89984;
     cursor: not-allowed;
 }
+/* general styling }}} */
+
+/* Join screen — team name input */
+#joinScreen {
+    width: 100%;
+    max-width: 400px;
+    text-align: center;
+    margin-top: 80px;
+}
+
+/* Quiz screen (hidden by default) */
+#quizScreen {
+    width: 100%;
+    display: none;
+}
+
+#questionsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 
 /* Question card */
 .question-card {
@@ -70,6 +81,14 @@ button:disabled {
     border-radius: 12px;
     padding: 16px;
     margin: 12px 0;
+    width: 500px;
+    max-width: 100%;
+}
+
+/* Question card with LaTeX — dynamic width to fit the formula */
+.question-card.has-math {
+    width: fit-content;
+    overflow-x: auto;
 }
 
 .question-card .question-text {

@@ -13,6 +13,9 @@ inline const std::string &webContentHtml() {
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Квиз</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body {
@@ -38,11 +41,29 @@ p  { color: #a89984; margin: 8px 0; font-size: 14px; }
     margin-top: 80px;
 }
 
-/* Quiz screen (hidden by default) */
+/* Quiz screen */
 #quizScreen {
     width: 100%;
-    max-width: 500px;
+    max-width: 100%;
     display: none;
+}
+
+#questionsContainer {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Question card */
+.question-card {
+    background: #282828;
+    border-radius: 12px;
+    padding: 16px;
+    margin: 12px 0;
+    overflow-x: auto;
+    width: fit-content;
+    min-width: min(300px, 100%);
+    max-width: 100%;
 }
 
 input, textarea, button {
@@ -86,6 +107,13 @@ button:disabled {
     border-radius: 12px;
     padding: 16px;
     margin: 12px 0;
+    width: 380px;
+    max-width: 100%;
+}
+
+.question-card.has-math {
+    width: fit-content;
+    overflow-x: auto;
 }
 
 .question-card .question-text {
@@ -336,6 +364,9 @@ function showQuiz() {
         const card = document.createElement('div');
         card.className = 'question-card';
         card.id = 'question-' + q.id;
+        if (q.text.indexOf('$$') !== -1) {
+            card.classList.add('has-math');
+        }
 
         const text = document.createElement('div');
         text.className = 'question-text';
@@ -396,6 +427,16 @@ function showQuiz() {
 
         container.appendChild(card);
     });
+
+    // Render LaTeX math in questions
+    if (typeof renderMathInElement === 'function') {
+        try {
+            renderMathInElement(container, {
+                delimiters: [{left: '$$', right: '$$', display: true}],
+                throwOnError: false
+            });
+        } catch(e) { console.warn('Math render error:', e); }
+    }
 }
 // }}}
 // submitAnswer {{{
