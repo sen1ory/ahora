@@ -426,6 +426,16 @@ function rebuildTeamCards() {
                                                 return "Ответ: " + td.answers[index]
                                             return "Нет ответа"
                                         }
+                                        color: {
+                                            var td = detailPopup.teamDataMap
+                                            if (td.statuses && index < td.statuses.length) {
+                                                var s = td.statuses[index];
+                                                if (s === "green")  return "#98971a"
+                                                if (s === "red")    return "#cc241d"
+                                                if (s === "orange") return "#d65d0e"
+                                            }
+                                            return "#ebdbb2"
+                                        }
                                     }
 
                                     // Status
