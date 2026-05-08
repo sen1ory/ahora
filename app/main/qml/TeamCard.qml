@@ -80,7 +80,7 @@ Rectangle {
                     }
                 }
 
-                // Question text
+                // Question text (single line, elided)
                 Text {
                     anchors {
                         left: statusDot.right
@@ -96,6 +96,7 @@ Rectangle {
                     }
                     color: "#ebdbb2"
                     font.pixelSize: 11
+                    maximumLineCount: 1
                     elide: Text.ElideRight
                 }
             }
