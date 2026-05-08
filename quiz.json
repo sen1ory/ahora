@@ -122,22 +122,19 @@
     },
     {
       "type": "text",
-      "text": "$$\n\\int_{1941}^{1945} \n\\left( \n\\text{Эвакуация}^{1523 \\text{ предприятия}} + \n\\uparrow \\text{производство танков/самолётов/снарядов} \n\\right)\n= \n\\left\\{ \n\\begin{matrix}\n\\uparrow \\text{военный потенциал} \\\\\n\\downarrow \\text{потери} \\\\\n\\fbox{??}\n\\end{matr
-ix}\n\\right\\}\n$$",
+      "text": "$$\n\\int_{1941}^{1945} \n\\left( \n\\text{Эвакуация}^{1523 \\text{ предприятия}} + \n\\uparrow \\text{производство танков/самолётов/снарядов} \n\\right)\n= \n\\left\\{ \n\\begin{matrix}\n\\uparrow \\text{военный потенциал} \\\\\n\\downarrow \\text{потери} \\\\\n\\fbox{??}\n\\end{matrix}\n\\right\\}\n$$",
       "options": [],
       "correct": []
     },
     {
       "type": "text",
-      "text": "$$\n\\frac{\n\\fbox{1 ??} \\times 1943 + \n\\left\\{ \\begin{matrix}\n\\uparrow \\text{моральный дух} \\\\\n\\uparrow \\text{промышленность}^{\\text{Урал}} \\\\\n\\text{оборонительная линия -частично раздроблена} \\\\\n\\text{Ленд-Лиз}\n\\end{matrix} \\right\\}\n}{\n\\left\\{ \\begin{
-matrix}\n\\downarrow \\text{ресурсы Оси} \\\\\n\\downarrow \\text{инициатива Вермахта}\n\\end{matrix} \\right\\}\n}\n\\fbox{2 ??} \\rightarrow \\text{Курская дуга} \\times 1943\n$$",
+      "text": "$$\n\\frac{\n\\fbox{1 ??} \\times 1943 + \n\\left\\{ \\begin{matrix}\n\\uparrow \\text{моральный дух} \\\\\n\\uparrow \\text{промышленность}^{\\text{Урал}} \\\\\n\\text{оборонительная линия -частично раздроблена} \\\\\n\\text{Ленд-Лиз}\n\\end{matrix} \\right\\}\n}{\n\\left\\{ \\begin{matrix}\n\\downarrow \\text{ресурсы Оси} \\\\\n\\downarrow \\text{инициатива Вермахта}\n\\end{matrix} \\right\\}\n}\n\\fbox{2 ??} \\rightarrow \\text{Курская дуга} \\times 1943\n$$",
       "options": [],
       "correct": []
     },
     {
       "type": "text",
-      "text": "$$\n\\left\\{ \n\\begin{matrix}\n\\text{Разгром нацизма} \\\\\n\\text{Ялтинско-Потсдамская соглашения} \\\\\n\\text{ООН} \\times 1945 \\\\\n\\uparrow \\text{влияние СССР и США}\n\\end{matrix}\n\\right\\}\n\\implies \n\\left\\{ \n\\begin{matrix}\n\\text{Биполярный мир} \\\\\n\\text{Хол
-одная война} \\\\\n\\fbox{??}\n\\end{matrix}\n\\right\\}\n$$",
+      "text": "$$\n\\left\\{ \n\\begin{matrix}\n\\text{Разгром нацизма} \\\\\n\\text{Ялтинско-Потсдамская соглашения} \\\\\n\\text{ООН} \\times 1945 \\\\\n\\uparrow \\text{влияние СССР и США}\n\\end{matrix}\n\\right\\}\n\\implies \n\\left\\{ \n\\begin{matrix}\n\\text{Биполярный мир} \\\\\n\\text{Холодная война} \\\\\n\\fbox{??}\n\\end{matrix}\n\\right\\}\n$$",
       "options": [],
       "correct": []
     }
