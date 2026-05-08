@@ -314,8 +314,9 @@ function rebuildTeamCards() {
 
     function openTeamDetail(teamId) {
         panelRoot.detailTeamId = teamId
-        panelRoot.detailVisible = true
+        detailPopup.teamDataMap = ({})
         detailPopup.refreshTeamData()
+        panelRoot.detailVisible = true
     }
 
     function closeTeamDetail() {
@@ -330,13 +331,13 @@ function rebuildTeamCards() {
         property var teamDataMap: ({})
 
         function refreshTeamData() {
-            if (panelRoot.detailVisible && panelRoot.detailTeamId !== "") {
+            if (panelRoot.detailTeamId !== "") {
                 teamDataMap = SM.getTeamDataMap(panelRoot.detailTeamId);
             }
         }
 
-    // React to model changes: rebuild cards when teams join/leave or data updates
-    Connections {
+        // React to model changes: rebuild cards when teams join/leave or data updates
+        Connections {
             target: SM
             function onTeamDataChanged(teamId) {
                 if (teamId === panelRoot.detailTeamId) {
@@ -402,8 +403,6 @@ function rebuildTeamCards() {
                                 radius: 8
                                 border.color: "#504945"
                                 border.width: 1
-                                visible: panelRoot.detailVisible
-
                                 Column {
                                     id: questionCol
                                     anchors {
