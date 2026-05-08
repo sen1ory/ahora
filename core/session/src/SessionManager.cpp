@@ -159,8 +159,8 @@ QString SessionManager::addTeam(const QString &name, QWebSocket *socket) {
     auto *team = new TeamData;
     team->id = id;
     team->name = name;
-    team->statuses = {"white", "white", "white"};
-    team->answers = {"", "", ""};
+    team->statuses = QStringList(m_quizQuestions.size(), "white");
+    team->answers = QStringList(m_quizQuestions.size(), QString());
     team->socket = socket;
     m_teams.append(team);
     endInsertRows();
