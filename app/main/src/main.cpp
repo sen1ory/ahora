@@ -10,6 +10,7 @@
 
 int main(int argc, char *argv[]) {
     QGuiApplication app(argc, argv);
+    qputenv("QT_QUICK_CONTROLS_STYLE", "Fusion");
     QQmlApplicationEngine engine;
 
     // --- AhoraTheme singleton (QML singleton requires manual instantiation) ---

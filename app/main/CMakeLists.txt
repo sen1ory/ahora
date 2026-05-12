@@ -23,9 +23,17 @@ target_link_libraries(ahora PRIVATE
     Qt6::Network
     Qt6::WebSockets
     ahora_app_main
+    ahora_app_mainplugin_init
+    ahora_app_mainplugin
     ahora_app_qrcode
+    ahora_app_qrcodeplugin_init
+    ahora_app_qrcodeplugin
     ahora_core_session
     ahora_core_wsserver
     ahora_core_httpserver
     ahora_core_ipaddress
+    ahora_core_ipaddressplugin_init
+    ahora_core_ipaddressplugin
 )
+
+qt_import_qml_plugins(ahora)
